@@ -290,6 +290,7 @@ body.home #vHome{background:#fafafa}
 .fmiss{position:absolute;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);pointer-events:none;transform:scale(2.2);opacity:.6;transition:transform .6s cubic-bezier(.65,0,.35,1),opacity .6s ease}
 .fmiss.go{transform:scale(1.5);opacity:0}
 .fview{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse 62% 66% at 50% 50%,rgba(0,0,0,0) 65%,rgba(10,8,6,.22) 88%,rgba(5,4,3,.42) 100%)}
+.held #hcapDial{position:absolute;left:calc(37% - 8px) !important;right:auto !important;top:5% !important;transform:translate(-100%,-50%) !important;margin:0 !important}
 </style>
 </head>
 <body>
@@ -297,7 +298,7 @@ body.home #vHome{background:#fafafa}
 <header>
   <div class="brand" id="brand"><img src="logo.svg" alt="Pinch"></div>
   <div class="right">
-    <button class="gp fillbtn" id="fillBtn">다이얼 채우기</button>
+    <button class="gp fillbtn" id="fillBtn">28장 채우기</button>
     <div class="placewrap"><button class="gp place" id="placeBtn" aria-haspopup="listbox" aria-expanded="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span id="placeName">장소</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg></button>
       <div class="pmenu" id="pmenu" role="listbox"></div></div>
     <div class="gp modes"><button id="mField" class="on">현장</button><button id="mHome">어플</button></div>
@@ -323,6 +324,7 @@ body.home #vHome{background:#fafafa}
       <div class="recglow" id="recglow"></div>
       <button class="hbtn js-btn" id="hbtn3d" aria-label="전원/채집 버튼"></button>
       <div class="hcap" id="hcap3d">눌러서 채집</div>
+      <div class="hcap" id="hcapDial">돌려서 음량 조절</div>
     </div>
 
   </div>
@@ -604,7 +606,7 @@ function playShot(i,b){
 
 /* ---------- modes ---------- */
 const TR=550;let slideTok=0;
-function setMode(m){const from=mode;mode=m;closeMenu();$('fillBtn').textContent=m==='home'?'리셋하기':'다이얼 채우기';document.body.classList.toggle('home',m==='home');$('mField').classList.toggle('on',m==='field');$('mHome').classList.toggle('on',m==='home');
+function setMode(m){const from=mode;mode=m;closeMenu();$('fillBtn').textContent=m==='home'?'리셋하기':'28장 채우기';document.body.classList.toggle('home',m==='home');$('mField').classList.toggle('on',m==='field');$('mHome').classList.toggle('on',m==='home');
   if(m==='home')renderApp();
   const inn=$(m==='field'?'vField':'vHome'),out=$(m==='field'?'vHome':'vField');
   if(from===m){inn.classList.add('on');out.classList.remove('on');}
