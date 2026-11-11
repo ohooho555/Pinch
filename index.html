@@ -286,11 +286,7 @@ body.home #vHome{background:#fafafa}
 .reticle .lbl{display:none}
 .fblur{position:absolute;inset:0;pointer-events:none;opacity:0;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);transition:opacity .45s ease}
 .fsplit{position:absolute;left:0;top:0;width:140px;height:140px;margin:-70px 0 0 -70px;pointer-events:none;opacity:0;transition:opacity .3s ease}
-.fsplit .h{position:absolute;inset:0;border-radius:50%;background-repeat:no-repeat;overflow:hidden}
-.fsplit .h.t{clip-path:inset(0 0 50% 0)}
-.fsplit .h.b{clip-path:inset(50% 0 0 0)}
 .fsplit .fring{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(0,0,0,.15),0 4px 18px rgba(0,0,0,.25);transform-origin:50% 50%}
-.fsplit .seam{position:absolute;left:0;right:0;top:50%;height:1px;margin-top:-.5px;background:rgba(255,255,255,.7)}
 .fsplit .flbl{position:absolute;left:50%;top:calc(100% + 12px);transform:translateX(-50%);white-space:nowrap;background:rgba(30,30,36,.8);color:#fff;font-size:13px;padding:5px 11px;border-radius:999px;opacity:0;transition:opacity .3s}
 .fmiss{position:absolute;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);pointer-events:none;transform:scale(2.2);opacity:.6;transition:transform .6s cubic-bezier(.65,0,.35,1),opacity .6s ease}
 .fmiss.go{transform:scale(1.5);opacity:0}
@@ -410,14 +406,14 @@ addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown
 addEventListener('keyup',e=>{delete keys[e.code];});
 stage.addEventListener('wheel',e=>{if(e.target.closest('.aside-a'))return;e.preventDefault();setVol(vol-e.deltaY/1200);},{passive:false});
 const aimPt=()=>({x:cam.x+(ptr.x-sw/2)/sc,y:cam.y+(ptr.y-sh/2)/sc});
-let focus=null;const FDUR=1000,FR=70;
+let focus=null;const FDUR=750,FR=70;
 function setFocus(){const p=aimPt();const best=SRC.reduce((m,q)=>Math.max(m,focusOf(q,p.x,p.y)),0);
   if(best<.3){missRing();return;}
   focus={x:p.x,y:p.y,t0:performance.now()};$('flbl').style.opacity=0;}
 function missRing(){const r=document.createElement('i');r.className='fmiss';r.style.left=ptr.x+'px';r.style.top=ptr.y+'px';stage.insertBefore(r,$('ret'));
   requestAnimationFrame(()=>requestAnimationFrame(()=>r.classList.add('go')));setTimeout(()=>r.remove(),700);}
 function clearFocus(){focus=null;}
-const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const ease=t=>1-Math.pow(1-t,3);
 
 /* ---------- audio ---------- */
 let ctx=null,master=null,live={},bufCache={},liveScene=null,bus=null;const XF=.45;
