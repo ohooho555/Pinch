@@ -279,6 +279,19 @@ body.home #vHome{background:#fafafa}
 .xfade{position:absolute;inset:0;pointer-events:none;opacity:1;transition:opacity .45s ease;overflow:hidden}
 .gp,.modes.gp button{transition:background-color .55s ease,color .55s ease}
 .brand img{transition:filter .45s ease}
+
+/* ---- focus (split-image) ---- */
+.reticle .ring,.reticle .wave{display:none}
+.reticle .dot{left:-4px;top:-4px;width:8px;height:8px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.25),0 1px 4px rgba(0,0,0,.35)}
+.reticle .lbl{display:none}
+.fblur{position:absolute;inset:0;pointer-events:none;opacity:0;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);transition:opacity .45s ease}
+.fsplit{position:absolute;left:0;top:0;width:140px;height:140px;margin:-70px 0 0 -70px;pointer-events:none;opacity:0;transition:opacity .3s ease}
+.fsplit .h{position:absolute;inset:0;border-radius:50%;background-repeat:no-repeat;overflow:hidden}
+.fsplit .h.t{clip-path:inset(0 0 50% 0)}
+.fsplit .h.b{clip-path:inset(50% 0 0 0)}
+.fsplit::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(0,0,0,.15),0 4px 18px rgba(0,0,0,.25)}
+.fsplit .seam{position:absolute;left:0;right:0;top:50%;height:1px;margin-top:-.5px;background:rgba(255,255,255,.7)}
+.fsplit .flbl{position:absolute;left:50%;top:calc(100% + 12px);transform:translateX(-50%);white-space:nowrap;background:rgba(30,30,36,.8);color:#fff;font-size:13px;padding:5px 11px;border-radius:999px;opacity:0;transition:opacity .3s}
 </style>
 </head>
 <body>
@@ -297,9 +310,11 @@ body.home #vHome{background:#fafafa}
   <div class="stage" id="stage">
     <img class="blurbg" id="blurImg" alt=""><div class="pano" id="pano"><img id="panoImg" alt=""></div>
     <div class="vig"></div>
+    <div class="fblur" id="fblur"></div>
+    <div class="fsplit" id="fsplit"><div class="h t" id="fsT"></div><div class="h b" id="fsB"></div><i class="seam" id="fsSeam"></i><div class="flbl" id="flbl"></div></div>
     <div class="reticle" id="ret"><div class="wave" id="wave"></div><div class="ring"></div><div class="dot"></div><div class="lbl" id="lbl"></div></div>
     <div class="flash" id="flash"></div>
-    <div class="tip" id="tip">화면을 한 번 클릭해 소리를 켜고, 장면 속 작은 소리를 겨눠 보세요 · 빨간 버튼을 누르면 바로 채집돼요</div>
+    <div class="tip" id="tip">소리가 나는 곳을 클릭해 초점을 맞추고 · 빨간 버튼을 눌러 채집해요</div>
     <div class="edge l" id="edgeL"></div><div class="edge r" id="edgeR"></div><div class="edge t" id="edgeT"></div><div class="edge b" id="edgeB"></div>
     <!-- 시안 A -->
     <div class="held" id="held">
@@ -386,11 +401,19 @@ function setPtr(e){const r=stage.getBoundingClientRect();ptr.x=e.clientX-r.left;
 stage.addEventListener('pointermove',e=>{setPtr(e);if(!moved){moved=true;setTimeout(()=>$('tip').style.opacity=0,3500);}});
 addEventListener('pointermove',e=>{if(mode==='field'&&!stage.contains(e.target))setPtr(e);});
 document.addEventListener('mouseout',e=>{if(!e.relatedTarget)ptr.in=false;});
-stage.addEventListener('pointerdown',e=>{initAudio();if(e.pointerType!=='mouse')setPtr(e);});
+stage.addEventListener('pointerdown',e=>{initAudio();if(e.pointerType!=='mouse')setPtr(e);
+  if(e.button===0&&scene&&!e.target.closest('.hbtn,.hdial,.held')&&!ptr.ui)setFocus();});
+addEventListener('keydown',e=>{if(e.key==='Escape')clearFocus();});
 addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS'].includes(e.code)){keys[e.code]=1;e.preventDefault();}});
 addEventListener('keyup',e=>{delete keys[e.code];});
 stage.addEventListener('wheel',e=>{if(e.target.closest('.aside-a'))return;e.preventDefault();setVol(vol-e.deltaY/1200);},{passive:false});
 const aimPt=()=>({x:cam.x+(ptr.x-sw/2)/sc,y:cam.y+(ptr.y-sh/2)/sc});
+const FOCUS_MODE=new URLSearchParams(location.search).get('focus')==='both'?'both':'sound';
+let focus=null;const FDUR=750,FR=70;
+function setFocus(){const p=aimPt();focus={x:p.x,y:p.y,t0:performance.now()};$('flbl').style.opacity=0;
+  const img=`url(scenes/${scene.id}.jpg)`;$('fsT').style.backgroundImage=img;$('fsB').style.backgroundImage=img;}
+function clearFocus(){focus=null;}
+const ease=t=>1-Math.pow(1-t,3);
 
 /* ---------- audio ---------- */
 let ctx=null,master=null,live={},bufCache={},liveScene=null,bus=null;const XF=.45;
@@ -437,10 +460,22 @@ function frame(now){
   $('edgeT').style.opacity=vy<0?Math.min(1,-vy*2):0;$('edgeB').style.opacity=vy>0?Math.min(1,vy*2):0;
   pano.style.transform=`translate(${sw/2-cam.x*sc}px,${sh/2-cam.y*sc}px) scale(${sc})`;
   ret.style.transform=`translate(${ptr.x}px,${ptr.y}px)`;ret.style.opacity=ptr.ui?0:1;stage.style.cursor=ptr.ui?'default':'none';
-  if(!ptr.ui)aim=aimPt();
+  let fp=0;
+  if(focus){const fx=sw/2+(focus.x-cam.x)*sc,fy=sh/2+(focus.y-cam.y)*sc;
+    if(fx<-FR||fy<-FR||fx>sw+FR||fy>sh+FR)clearFocus();
+    else{fp=Math.min(1,(now-focus.t0)/FDUR);const e2=ease(fp),R=FR+ (1-e2)*220,d=(1-e2)*40,bs=`${PW*sc}px ${PH*sc}px`,
+      ox=sw/2-cam.x*sc-(fx-FR),oy=sh/2-cam.y*sc-(fy-FR),fb=$('fblur'),fsp=$('fsplit');
+      const m=`radial-gradient(circle at ${fx}px ${fy}px,transparent ${R}px,#000 ${R+60}px)`;fb.style.maskImage=m;fb.style.webkitMaskImage=m;fb.style.opacity=1;
+      fsp.style.transform=`translate(${fx}px,${fy}px)`;fsp.style.opacity=1;
+      $('fsT').style.backgroundSize=bs;$('fsB').style.backgroundSize=bs;
+      $('fsT').style.backgroundPosition=`${ox-d}px ${oy}px`;$('fsB').style.backgroundPosition=`${ox+d}px ${oy}px`;
+      $('fsSeam').style.opacity=1-e2;
+      aim={x:focus.x,y:focus.y};}}
+  if(!focus){$('fblur').style.opacity=0;$('fsplit').style.opacity=0;if(!ptr.ui)aim=aimPt();}
   if(held){const ox=ptr.x/sw-.5,oy=ptr.y/sh-.5;held.style.transform=`translate(${ox*24}px,${oy*14}px) rotate(${-5+ox*4}deg)`;held.style.opacity=1;
 }
-  const fs=SRC.map(s=>focusOf(s,aim.x,aim.y));let bi=0;fs.forEach((f,i)=>{if(f>fs[bi])bi=i;});
+  const fk=focus?1-.35*ease(fp):1;const fs=SRC.map(s=>Math.exp(-Math.pow(Math.hypot(s.x-aim.x,(s.y-aim.y)*1.2)/(R0*fk),2)));let bi=0;fs.forEach((f,i)=>{if(f>fs[bi])bi=i;});
+  if(focus&&fp>=1){const fl=$('flbl');if(SRC.length&&fs[bi]>.3){fl.textContent=SRC[bi].name;fl.style.opacity=1;}else{fl.textContent='';fl.style.opacity=0;}}
   const flip=ptr.x>sw-260;lbl.style.left=flip?'auto':'62px';lbl.style.right=flip?'62px':'auto';if(power&&SRC.length&&fs[bi]>.4&&!ptr.ui){lbl.textContent=SRC[bi].name;lbl.style.opacity=1;}else lbl.style.opacity=0;
   wph=(wph+.02)%1;const amp=power&&SRC.length?fs[bi]:0;wave.style.opacity=(1-wph)*amp;wave.style.transform=`scale(${1+wph*1.3})`;
   if(ctx&&liveScene&&scene&&liveScene===scene.id){const t=ctx.currentTime,hw=sw/2/sc;SRC.forEach((s,i)=>{const c=live[s.id];if(!c)return;c.g.gain.setTargetAtTime(gainFor(s.lv,fs[i],vol),t,.08);if(c.pan)c.pan.pan.setTargetAtTime(Math.max(-1,Math.min(1,(s.x-aim.x)/(PW*.35))),t,.1);});}
@@ -456,7 +491,7 @@ function goScene(id){
   const img=new Image();img.onload=()=>{clearTimeout(ldT);
     if(scene){const snap=document.createElement('div');snap.className='xfade';snap.appendChild($('blurImg').cloneNode());snap.appendChild(pano.cloneNode(true));snap.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));stage.insertBefore(snap,$('ret')&&$('ret').parentNode===stage?$('ret'):null);
       requestAnimationFrame(()=>requestAnimationFrame(()=>{snap.style.opacity='0';}));setTimeout(()=>snap.remove(),XF*1000+120);}
-    scene=s;SRC=s.src;PW=s.w;PH=s.h;R0=s.r||185;
+    clearFocus();scene=s;SRC=s.src;PW=s.w;PH=s.h;R0=s.r||185;
     $('panoImg').src=img.src;$('panoImg').width=PW;$('panoImg').height=PH;$('blurImg').src=`scenes/${id}-thumb.jpg`;
     $('placeName').textContent=s.name;loadLum(id);layout();cam.x=s.start?s.start[0]:PW/2;cam.y=s.start?s.start[1]:PH*.55;clampCam();
     $('loading').classList.remove('on');ensureLive();if(ctx)loadSounds(id);
@@ -514,7 +549,7 @@ function record(){
   rec=true;all('.js-rled').forEach(r=>r.classList.add('on'));
   const f=$('flash');f.style.transition='none';f.style.opacity=.8;requestAnimationFrame(()=>{f.style.transition='opacity .6s';f.style.opacity=0;});
   const x=aim.x,y=aim.y,m=SRC.map(s=>+focusOf(s,x,y).toFixed(3));
-  const shot={sc:scene.id,x:Math.round(x),y:Math.round(y),m,v:+vol.toFixed(2),t:Date.now()};
+  const shot={sc:scene.id,x:Math.round(x),y:Math.round(y),m,v:+vol.toFixed(2),t:Date.now()};if(FOCUS_MODE==='both'&&focus)shot.crop=1;
   setTimeout(()=>{state.shots.push(shot);save();rec=false;all('.js-rled').forEach(r=>r.classList.remove('on'));renderCounter();const n=state.shots.length;
     toast(n===MAX?'필름이 다 찼어요 · 이제 집에서 현상할 수 있어요':`${n}번째 순간을 담았어요 · ${MAX-n}장 남음`,n===MAX?4000:2200);},3000);
 }
@@ -525,7 +560,7 @@ function fillRoll(){(()=>{
   const now=Date.now();
   while(state.shots.length<MAX){const S=SCENES[Math.floor(Math.random()*SCENES.length)],s=S.src[Math.floor(Math.random()*S.src.length)],r=S.r||185;
     const x=s.x+(Math.random()-.5)*r*.7,y=s.y+(Math.random()-.5)*r*.4;
-    state.shots.push({sc:S.id,x:Math.round(x),y:Math.round(y),m:S.src.map(q=>+Math.exp(-Math.pow(Math.hypot(q.x-x,(q.y-y)*1.2)/r,2)).toFixed(3)),v:.7,t:now-(MAX-state.shots.length)*9*60000});}
+    state.shots.push({sc:S.id,x:Math.round(x),y:Math.round(y),m:S.src.map(q=>+Math.exp(-Math.pow(Math.hypot(q.x-x,(q.y-y)*1.2)/r,2)).toFixed(3)),v:.7,t:now-(MAX-state.shots.length)*9*60000,...(FOCUS_MODE==='both'?{crop:1}:{})});}
   save();renderCounter();toast('28장이 채워졌어요 · 어플 탭에서 현상해 보세요',3500);
 })();}
 
@@ -534,7 +569,9 @@ let developing=false;
 function domOf(s){const S=sceneOf(s.sc);if(!S)return null;let bi=0;s.m.forEach((v,i)=>{if(v>s.m[bi])bi=i;});return s.m[bi]>.4?S.src[bi]:null;}
 const nameOf=s=>{const d=domOf(s);return d?d.name:'주변 소리';};
 const hhmm=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
-function thumb(s,i){const S=sceneOf(s.sc),d=domOf(s);if(d&&d.ph&&d.ph.length)return `<img src="photos/${s.sc}/${d.ph[i%d.ph.length]}.jpg" alt="" loading="lazy">`;
+function thumb(s,i){const S=sceneOf(s.sc),d=domOf(s);
+  if(s.crop&&S){const W=S.w,H=S.h,w=W*.16,h=w/1.5,x=Math.max(w/2,Math.min(W-w/2,s.x)),y=Math.max(h/2,Math.min(H-h/2,s.y)),x0=x-w/2,y0=y-h/2;
+    return `<div class="amb" style="background-image:url(scenes/${s.sc}.jpg);background-size:${W/w*100}% auto;background-position:${x0/(W-w)*100}% ${y0/(H-h)*100}%"></div>`;}if(d&&d.ph&&d.ph.length)return `<img src="photos/${s.sc}/${d.ph[i%d.ph.length]}.jpg" alt="" loading="lazy">`;
   const W=S.w,H=S.h,w=W*.18,h=w/1.5,x=Math.max(w/2,Math.min(W-w/2,s.x)),y=Math.max(h/2,Math.min(H-h/2,s.y)),x0=x-w/2,y0=y-h/2;
   return `<div class="amb" style="background-image:url(scenes/${s.sc}-thumb.jpg);background-size:${W/w*100}% auto;background-position:${x0/(W-w)*100}% ${y0/(H-h)*100}%"></div>`;}
 function renderApp(){
