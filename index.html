@@ -220,31 +220,26 @@ body.home .fillbtn{background:#e6e6ec}
 .held .hdial:hover{box-shadow:0 0 0 2px rgba(255,255,255,.55)}
 .held .hdial.drag{cursor:grabbing}
 
-/* ---- Figma UI 282:161 ---- */
+/* ---- Figma UI 282:161 (Bright 282:34 / Dark 282:132 / App 282:186) ---- */
 header{padding:40px 60px 0 !important;align-items:flex-start !important}
-.brand{background:none !important;padding:0 !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;height:36px}
-.brand img{height:36px !important;width:auto;transition:filter .35s}
+.brand{background:none !important;padding:0 !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;height:35.65px}
+.brand img{height:35.65px !important;width:auto}
 .brand.light img{filter:brightness(0) invert(1)}
-.right{gap:16px}
-.gp{font-family:"Helvetica Neue",Helvetica,"Apple SD Gothic Neo","Pretendard",sans-serif;font-weight:500;font-size:17px;line-height:1;color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(9px) saturate(1.3);-webkit-backdrop-filter:blur(9px) saturate(1.3);border-radius:50px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 12px rgba(0,0,0,.12);text-shadow:0 1px 6px rgba(0,0,0,.35)}
-.modes.gp button.on,.pmenu button.cur{text-shadow:none}
-button.gp{height:54px;padding:0 20px;margin:0 !important;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap}
-button.gp:hover{background:rgba(255,255,255,.2)}
-.gp .ic{width:24px;height:24px;flex:none}
-.modes.gp{display:flex;gap:6px;padding:7px;height:54px;box-sizing:border-box}
-.modes.gp button{border:0;background:transparent;color:#fff;font:inherit;padding:8px 16px;border-radius:90px;cursor:pointer;box-shadow:none}
-.modes.gp button.on{background:#fff;color:#222}
-body.home .gp{background:rgba(34,34,40,.72);border-color:rgba(255,255,255,.12)}
-body.home button.gp:hover{background:rgba(34,34,40,.85)}
-body.home .fillbtn{background:rgba(34,34,40,.72)}
+.right{gap:13px;margin-top:.83px}
+.gp{font-family:"Helvetica Neue",Helvetica,sans-serif;font-weight:500;font-size:14.78px;line-height:normal;color:#3d3d3d;background:rgba(255,255,255,.4);border:0;border-radius:41.487px;box-shadow:none;text-shadow:none}
+button.gp{padding:13.276px 16.595px;margin:0 !important;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3.319px;white-space:nowrap}
+.gp .ic{width:19.914px;height:19.914px;flex:none}
+.modes.gp{display:flex;align-items:center;gap:4.978px;padding:6.638px}
+.modes.gp button{border:0;background:transparent;color:#3d3d3d;font:inherit;padding:6.638px 13.276px;border-radius:74.677px;cursor:pointer;box-shadow:none}
+.modes.gp button.on{background:#fff;color:#3d3d3d}
+body.home .gp{background:rgba(212,212,212,.68)}
+body.home .placewrap{display:none}
+body.home #vHome{background:#fafafa}
 .placewrap{position:relative}
-.pmenu{position:absolute;top:calc(100% + 8px);left:0;min-width:100%;padding:6px;border-radius:20px;background:rgba(28,28,34,.72);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;flex-direction:column;gap:2px;z-index:30}
+.pmenu{position:absolute;top:calc(100% + 6px);left:0;min-width:100%;padding:6.638px;border-radius:20px;background:rgba(255,255,255,.4);display:none;flex-direction:column;gap:2px;z-index:30}
 .pmenu.on{display:flex}
-.pmenu button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;color:#fff;font:500 15px "Helvetica Neue",Helvetica,"Apple SD Gothic Neo",sans-serif;white-space:nowrap}
-.pmenu button img{width:44px;height:28px;object-fit:cover;border-radius:6px;flex:none}
-.pmenu button:hover,.pmenu button:focus-visible{background:rgba(255,255,255,.12)}
-.pmenu button.cur{background:rgba(255,255,255,.92);color:#222}
-@media (max-width:900px){header{padding:20px 20px 0 !important}.gp{font-size:14px}button.gp,.modes.gp{height:44px}.modes.gp button{padding:6px 12px}.right{gap:8px}.brand img{height:28px !important}}
+.pmenu button{all:unset;cursor:pointer;padding:6.638px 13.276px;border-radius:74.677px;color:#3d3d3d;font:500 14.78px "Helvetica Neue",Helvetica,sans-serif;white-space:nowrap}
+.pmenu button.cur{background:#fff}
 </style>
 </head>
 <body>
@@ -252,7 +247,7 @@ body.home .fillbtn{background:rgba(34,34,40,.72)}
 <header>
   <div class="brand" id="brand"><img src="logo.svg" alt="Pinch"></div>
   <div class="right">
-    <button class="gp fillbtn" id="fillBtn">한 롤 채우기</button>
+    <button class="gp fillbtn" id="fillBtn">다이얼 채우기</button>
     <div class="placewrap"><button class="gp place" id="placeBtn" aria-haspopup="listbox" aria-expanded="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span id="placeName">장소</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg></button>
       <div class="pmenu" id="pmenu" role="listbox"></div></div>
     <div class="gp modes"><button id="mField" class="on">현장</button><button id="mHome">어플</button></div>
@@ -413,7 +408,7 @@ function goScene(id){
   img.onerror=()=>{$('loading').classList.remove('on');toast('장소를 불러오지 못했어요');};
   img.src=`scenes/${id}.jpg`;
 }
-function buildMenu(){$('pmenu').innerHTML=SCENES.map(s=>`<button role="option" class="${scene&&scene.id===s.id?'cur':''}" data-id="${s.id}"><img src="scenes/${s.id}-thumb.jpg" alt="">${s.name}</button>`).join('');
+function buildMenu(){$('pmenu').innerHTML=SCENES.map(s=>`<button role="option" class="${scene&&scene.id===s.id?'cur':''}" data-id="${s.id}">${s.name}</button>`).join('');
   all('#pmenu button').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();closeMenu();initAudio();goScene(b.dataset.id);}));}
 function closeMenu(){$('pmenu').classList.remove('on');$('placeBtn').setAttribute('aria-expanded','false');}
 $('placeBtn').addEventListener('click',e=>{e.stopPropagation();const on=!$('pmenu').classList.contains('on');if(on){buildMenu();$('pmenu').classList.add('on');$('placeBtn').setAttribute('aria-expanded','true');}else closeMenu();});
@@ -466,7 +461,7 @@ function record(){
   setTimeout(()=>{state.shots.push(shot);save();rec=false;all('.js-rled').forEach(r=>r.classList.remove('on'));renderCounter();const n=state.shots.length;
     toast(n===MAX?'필름이 다 찼어요 · 이제 집에서 현상할 수 있어요':`${n}번째 순간을 담았어요 · ${MAX-n}장 남음`,n===MAX?4000:2200);},3000);
 }
-$('fillBtn').addEventListener('click',()=>{if(mode==='home'){resetFilm();return;}fillRoll();});
+$('fillBtn').addEventListener('click',()=>fillRoll());
 function resetFilm(){state={roll:state.roll,shots:[],developed:false};save();renderCounter();setMode('field');toast('필름을 비웠어요 · 처음부터 다시 담아보세요');}
 function fillRoll(){(()=>{
   if(state.developed){toast('앱에서 새 필름을 넣은 뒤 사용하세요');return;}
@@ -513,7 +508,7 @@ function playShot(i,b){
 }
 
 /* ---------- modes ---------- */
-function setMode(m){mode=m;closeMenu();$('fillBtn').textContent=m==='home'?'리셋하기':'한 롤 채우기';document.body.classList.toggle('home',m==='home');$('mField').classList.toggle('on',m==='field');$('mHome').classList.toggle('on',m==='home');$('vField').classList.toggle('on',m==='field');$('vHome').classList.toggle('on',m==='home');setMaster();if(m==='home')renderApp();else layout();}
+function setMode(m){mode=m;closeMenu();document.body.classList.toggle('home',m==='home');$('mField').classList.toggle('on',m==='field');$('mHome').classList.toggle('on',m==='home');$('vField').classList.toggle('on',m==='field');$('vHome').classList.toggle('on',m==='home');setMaster();if(m==='home')renderApp();else layout();}
 $('mField').addEventListener('click',()=>setMode('field'));$('mHome').addEventListener('click',()=>setMode('home'));
 let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms);}
 (function(){const cv=document.getElementById('ctr2d');if(!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height,SW=7.9,SH=7.9*804/1264,SX=35.0,SY=83.3;
