@@ -195,13 +195,13 @@ body.lb header .brand{color:#fff}
 body.home .brand{background:transparent;padding-left:0;backdrop-filter:none;-webkit-backdrop-filter:none}
 .held{width:300px !important;height:546px !important;bottom:-70px !important;right:4% !important}
 .held .devimg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;user-select:none;filter:drop-shadow(0 18px 30px rgba(0,0,0,.35)) drop-shadow(0 2px 4px rgba(0,0,0,.2))}
-.held .ctr2d{position:absolute;left:33.6%;top:27.2%;width:13%;height:4.4%;pointer-events:none;border-radius:1px}
-.held .recglow{position:absolute;left:18.25%;top:38.6%;width:2.2%;height:1.2%;border-radius:50%;pointer-events:none;opacity:0;background:#ff3b40;box-shadow:0 0 6px 2px #ff3b40,0 0 14px 4px rgba(255,40,40,.5)}
+.held .ctr2d{position:absolute;left:36.89%;top:27.3%;width:12.54%;height:4.39%;pointer-events:none}
+.held .recglow{position:absolute;left:20.4%;top:38.07%;width:2.1%;height:1.15%;border-radius:50%;pointer-events:none;opacity:0;background:#ff3b40;box-shadow:0 0 6px 2px #ff3b40,0 0 14px 4px rgba(255,40,40,.5)}
 .held .recglow.on{animation:recb .5s infinite alternate}
 @keyframes recb{from{opacity:1}to{opacity:.15}}
-.held #hbtn3d{left:0;top:32.9%;width:6.6%;height:11.4%}
+.held #hbtn3d{left:2.4%;top:32.6%;width:7.4%;height:12.2%}
 .held #hbtn3d.press{box-shadow:inset 3px 0 6px rgba(0,0,0,.35) !important}
-.held #hcap3d{left:-12px !important;top:38.6% !important;transform:translate(-100%,-50%) !important;margin:0 !important}
+.held #hcap3d{left:-6px !important;top:38.6% !important;transform:translate(-100%,-50%) !important;margin:0 !important}
 .held3d{position:absolute;inset:0;pointer-events:none}
 .held3d canvas{display:block;width:100%;height:100%}
 .held .hbtn{position:absolute;background:transparent !important;box-shadow:none !important;border:0;border-radius:6px;cursor:pointer;transform:none !important}
@@ -215,6 +215,10 @@ body.home .brand{background:transparent;padding-left:0;backdrop-filter:none;-web
 .fillbtn{border:0;background:rgba(255,255,255,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;padding:12px 16px;font-size:13px;color:#33333b;cursor:pointer;margin-right:8px;font-family:inherit}
 .fillbtn:hover{background:rgba(255,255,255,.85)}
 body.home .fillbtn{background:#e6e6ec}
+.held .dialtick{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transform-origin:67.07% 21.36%;transition:transform .05s linear}
+.held .hdial{position:absolute;left:37.86%;top:5.3%;width:58.43%;height:32.12%;border-radius:50%;pointer-events:auto;cursor:grab;touch-action:none}
+.held .hdial:hover{box-shadow:0 0 0 2px rgba(255,255,255,.55)}
+.held .hdial.drag{cursor:grabbing}
 </style>
 </head>
 <body>
@@ -234,8 +238,10 @@ body.home .fillbtn{background:#e6e6ec}
     <div class="edge l" id="edgeL"></div><div class="edge r" id="edgeR"></div><div class="edge t" id="edgeT"></div><div class="edge b" id="edgeB"></div>
     <!-- 시안 A -->
     <div class="held" id="held">
-      <img class="devimg" src="device_back.png" alt="Pinch 뒷면" draggable="false">
-      <canvas class="ctr2d" id="ctr2d" width="1264" height="688"></canvas>
+      <img class="devimg" src="device_back.webp" alt="Pinch 뒷면" draggable="false">
+      <img class="dialtick" id="dialtick" src="dial_tick.png" alt="" draggable="false">
+      <div class="hdial" id="hdial" title="드래그 또는 휠: 볼륨"></div>
+      <canvas class="ctr2d" id="ctr2d" width="1264" height="804"></canvas>
       <div class="recglow" id="recglow"></div>
       <button class="hbtn js-btn" id="hbtn3d" aria-label="전원/채집 버튼"></button>
       <div class="hcap" id="hcap3d">길게: 전원 · 짧게: 채집</div>
@@ -293,7 +299,7 @@ function camTarget(){const hw=sw/2/sc,hh=sh/2/sc,fx=Math.min(1,Math.max(0,ptr.x/
 function clampCam(){const hw=sw/2/sc,hh=sh/2/sc;cam.x=Math.max(hw,Math.min(PW-hw,cam.x));cam.y=Math.max(hh,Math.min(PH-hh,cam.y));}
 addEventListener('resize',layout);
 function setPtr(e){const r=stage.getBoundingClientRect();ptr.x=e.clientX-r.left;ptr.y=e.clientY-r.top;ptr.in=true;
-  const overCtl=!!e.target.closest('.hbtn');let inDev=false;
+  const overCtl=!!e.target.closest('.hbtn,.hdial');let inDev=false;
   if(held&&document.body.classList.contains('la')){const h=held.getBoundingClientRect();inDev=e.clientX>h.left-30&&e.clientX<h.right+90&&e.clientY>h.top-90;}
   dodge=false;
   ptr.ui=overCtl||!!e.target.closest('.aside-a');}
@@ -463,17 +469,25 @@ function playShot(i,b){
 function setMode(m){mode=m;document.body.classList.toggle('home',m==='home');$('mField').classList.toggle('on',m==='field');$('mHome').classList.toggle('on',m==='home');$('vField').classList.toggle('on',m==='field');$('vHome').classList.toggle('on',m==='home');setMaster();if(m==='home')renderApp();else layout();}
 $('mField').addEventListener('click',()=>setMode('field'));$('mHome').addEventListener('click',()=>setMode('home'));
 let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms);}
-(function(){const cv=document.getElementById('ctr2d');if(!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height,SW=7.9,SH=4.3,SX=35.0,SY=83.3;
-  const px=mm=>mm/SW*W,X=xm=>W/2+px(SX-xm)*1.02,Y=ym=>H/2+px(SY-ym)*1.0;let last='';
+(function(){const cv=document.getElementById('ctr2d');if(!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height,SW=7.9,SH=7.9*804/1264,SX=35.0,SY=83.3;
+  const px=mm=>mm/SW*W,X=xm=>W/2+px(SX-xm)*1.0,Y=ym=>H/2+px(SY-ym)*1.12;let last='';
   function draw(){const P=power,N=state.shots.length,k=P+'|'+N;if(k!==last){last=k;
     g.fillStyle='#262628';g.fillRect(0,0,W,H);
     const nums=[N+1,N,N-1],xs=[31.6,35.0,38.3],ys=[83.55,83.05,82.5];
     g.fillStyle=P?'#f2f2f2':'rgba(242,242,242,.13)';g.shadowColor='rgba(255,255,255,.45)';g.shadowBlur=P?14:0;
-    g.font=`500 ${Math.round(px(1.75))}px Jost, Futura, "Avenir Next", "Century Gothic", Arial, sans-serif`;g.textAlign='center';g.textBaseline='middle';
+    g.font=`500 ${Math.round(px(2.05))}px Jost, Futura, "Avenir Next", "Century Gothic", Arial, sans-serif`;g.textAlign='center';g.textBaseline='middle';
     nums.forEach((n,i)=>{if(n<0||n>28)return;g.save();g.translate(X(xs[i]),Y(ys[i]));g.rotate(Math.PI/2);g.fillText(String(n).padStart(2,'0'),0,0);g.restore();});
     [33.1,36.8].forEach(xm=>{g.beginPath();g.arc(X(xm),Y(83.0),px(.2),0,Math.PI*2);g.fill();});}
     document.getElementById('recglow').classList.toggle('on',!!rec);requestAnimationFrame(draw);}
   (document.fonts?document.fonts.load('500 100px Jost'):Promise.resolve()).finally(()=>{last='';});draw();})();
+(function(){const tk=document.getElementById('dialtick'),hd=document.getElementById('hdial');if(!tk)return;
+  const A0=43,AMIN=-30,AMAX=135;   // tick angle in the export, and allowed range (deg, clockwise from 12 o'clock)
+  let lastV=-1;(function loop(){if(vol!==lastV){lastV=vol;tk.style.transform=`rotate(${AMIN+vol*(AMAX-AMIN)-A0}deg)`;}requestAnimationFrame(loop);})();
+  let drag=null;const ang=e=>{const r=hd.getBoundingClientRect();return Math.atan2(e.clientX-(r.left+r.width/2),-(e.clientY-(r.top+r.height/2)))*180/Math.PI;};
+  hd.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();initAudio();drag={a:ang(e),v:vol};hd.classList.add('drag');try{hd.setPointerCapture(e.pointerId);}catch(_){}});
+  hd.addEventListener('pointermove',e=>{if(!drag)return;let d=ang(e)-drag.a;if(d>180)d-=360;if(d<-180)d+=360;setVol(drag.v+d/(AMAX-AMIN));});
+  const end=()=>{drag=null;hd.classList.remove('drag');};hd.addEventListener('pointerup',end);hd.addEventListener('pointercancel',end);
+  hd.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();setVol(vol-e.deltaY/1200);},{passive:false});})();
 window.simPower=()=>power;window.simCount=()=>state.shots.length;window.simRec=()=>rec;window.simVol=()=>vol;
 document.body.classList.add('la');
 
