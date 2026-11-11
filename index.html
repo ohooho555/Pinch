@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pinch — 사용 시뮬레이션</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root{--bg:#f4f4f6;--ink:#2b2b33;--mute:#8a8a96;--red:#e2393f;--line:#e2e2ea}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -240,6 +241,39 @@ body.home #vHome{background:#fafafa}
 .pmenu.on{display:flex}
 .pmenu button{all:unset;cursor:pointer;padding:6.638px 13.276px;border-radius:74.677px;color:#3d3d3d;font:500 14.78px "Helvetica Neue",Helvetica,sans-serif;white-space:nowrap}
 .pmenu button.cur{background:#fff}
+
+/* ---- Figma phone 282:441 ---- */
+#vHome{background:#fafafa !important;overflow:auto}
+.fp{position:absolute;left:50%;top:116px;width:308.127px;height:668px;margin-left:-154px;border-radius:34.498px;background:#ededf2;overflow:hidden;font-family:"Helvetica Neue",Helvetica,"Pretendard Variable",Pretendard,sans-serif;color:#060606}
+.fp::after{content:"";position:absolute;inset:0;border:5px solid #111;border-radius:inherit;pointer-events:none;z-index:9}
+.fp>*{position:absolute;margin:0}
+.fp-status{left:25.87px;top:17.15px;width:257.166px;height:10.888px}
+.fp-logo{left:18px;top:66px;width:61.001px;height:19.418px}
+.fp-more{left:269px;top:68px}
+.fp-dev{left:47.14px;top:94px;width:236.043px;height:292.358px}
+.fp-fade{left:126.05px;top:333.07px;width:43.113px;height:57.933px;background:linear-gradient(to bottom,rgba(237,237,242,0),#ededf2)}
+.fp-stat{left:50%;transform:translateX(-50%);margin-left:.44px;top:397px;display:flex;align-items:center;gap:10px;font-size:11px;white-space:nowrap}
+.fp-bat{display:flex;align-items:center;gap:2px}
+.fp-div{display:block;width:.5px;height:8px;background:#a2a2a2}
+.fp-bt{display:flex;align-items:center;justify-content:flex-end;width:48px;color:#699667;line-height:11px}
+.fp-ready{left:50%;transform:translateX(-50%);top:423px;font-size:11px;white-space:nowrap}
+.fp-sheet{left:0;top:456px;width:308px;height:212px}
+.fp-roll{left:23px;top:485px;font-size:20px;line-height:24px}
+.fp-cnt{right:24.06px;top:485px;font-size:20px;line-height:24px;text-align:right}
+.fp-cnt small{font-size:13px;color:#757575}
+.fp-bars{left:23px;top:515px;width:262px;height:13px;display:flex;justify-content:space-between}
+.fp-bars i{display:block;width:7.54px;height:13px;border-radius:1px;background:#caccd0}
+.fp-bars i.f{background:#686868}
+.fp-cta{left:50%;transform:translateX(-50%);top:540px;width:262px;height:40px;border:0;border-radius:21px;background:#77787b;color:#bebebe;font:500 12px "Pretendard Variable",Pretendard,sans-serif;letter-spacing:-.36px;cursor:default}
+.fp-cta:not(:disabled){cursor:pointer}
+.fp-tab{left:18px;top:592px;width:272px;height:54px;padding:3px;box-sizing:border-box;border-radius:27px;background:rgba(204,204,206,.39);display:flex;align-items:center;justify-content:center}
+.fp-tabs{display:flex;align-items:center}
+.fp-tabs button{width:70px;height:48px;margin-right:-5px;border:0;background:transparent;border-radius:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;cursor:pointer;font:400 10px/11px "Pretendard Variable",Pretendard,sans-serif;letter-spacing:-.3px;color:#000}
+.fp-tabs button:last-child{margin-right:0}
+.fp-tabs button.on{background:rgba(255,255,255,.48)}
+.fp-over{inset:0;top:96px;bottom:70px;background:#ededf2;display:none;z-index:5;overflow-y:auto}
+.fp-over.on{display:block}
+.fp-over .appbody{padding:8px 16px 16px}
 </style>
 </head>
 <body>
@@ -278,18 +312,33 @@ body.home #vHome{background:#fafafa}
 </section>
 
 <section class="view" id="vHome">
-  <div class="home">
-    <div class="phone"><div class="screen">
-      <div class="bar"><span>9:41</span><span>●●● ▮</span></div>
-      <div class="apphead"><h2><img src="logo.svg" alt="Pinch" style="height:24px;display:block"></h2><span class="mono" id="rollNo">ROLL 01</span></div>
-      <div class="appbody" id="app"></div>
-    </div></div>
-    <div class="sidetxt">
-      <h4>현장에선 귀로, 집에선 기록으로</h4>
-      <p>필름 카메라처럼, 28장을 모두 채우기 전에는 무엇을 담았는지 볼 수 없습니다.</p>
-      <p>현상한 뒤에야 그날의 소리와 장면을 다시 꺼내 들을 수 있어요.</p>
-      <p>공유 버튼은 없습니다. 오직 나를 위한 기록이니까요.</p>
+  <!-- Figma 282:186 / phone 282:441 -->
+  <div class="fp" id="fp">
+    <img class="fp-status" src="ui/status.svg" alt="">
+    <img class="fp-logo" src="logo.svg" alt="Pinch">
+    <svg class="fp-more" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M9.165 3.333a.833.833 0 1 0 1.667 0 .833.833 0 0 0-1.667 0ZM9.165 10a.833.833 0 1 0 1.667 0 .833.833 0 0 0-1.667 0ZM9.165 16.667a.833.833 0 1 0 1.667 0 .833.833 0 0 0-1.667 0Z" fill="#000" stroke="#000"/></svg>
+    <img class="fp-dev" src="app_device.webp" alt="">
+    <div class="fp-fade"></div>
+    <div class="fp-stat">
+      <span class="fp-bat"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.375 4.585H13.5c.276 0 .54.11.735.305.195.195.305.459.305.735v.647h.647c.276 0 .54.11.735.305.195.195.305.459.305.735v3.376c0 .276-.11.54-.305.735a1.04 1.04 0 0 1-.735.305h-.647v.647c0 .276-.11.54-.305.735a1.04 1.04 0 0 1-.735.305H3.375c-.276 0-.54-.11-.735-.305a1.04 1.04 0 0 1-.305-.735v-6.75c0-.276.11-.54.305-.735.171-.171.395-.276.633-.3l.102-.005ZM3.29 12.46h10.295v-1.688h1.688V7.228h-1.688V5.54H3.29v6.92Z" fill="#000" stroke="#DADADD" stroke-width=".17"/><path d="M9 6.75v4.5H4.5v-4.5H9Z" fill="#000" stroke="#000"/></svg>56%</span>
+      <i class="fp-div"></i>
+      <span class="fp-bt"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.625 6.593a.39.39 0 0 1 .604-.563L8.887 8.51V4.533c0-.474.614-.711.972-.376l2.474 2.31a.51.51 0 0 1 0 .751L9.89 9.5l2.444 2.282a.51.51 0 0 1 0 .751l-2.474 2.31c-.358.335-.972.098-.972-.376v-3.978l-2.658 2.482a.43.43 0 0 1-.604-.001.38.38 0 0 1-.125-.282c0-.052.011-.104.033-.152a.4.4 0 0 1 .093-.13L8.739 9.5 5.625 6.593Zm4.116-1.42V8.51l1.788-1.669-1.788-1.668Zm1.788 6.985-1.788-1.669v3.337l1.788-1.668Z" fill="#699667"/></svg>연결됨</span>
     </div>
+    <p class="fp-ready">기록할 준비가 되었어요</p>
+    <img class="fp-sheet" src="ui/sheet.svg" alt="">
+    <p class="fp-roll" id="rollNo">ROLL 01</p>
+    <p class="fp-cnt"><span id="fpN">0</span><small>/28</small></p>
+    <div class="fp-bars" id="fpBars"></div>
+    <button class="fp-cta" id="dev" disabled>현상 준비 중</button>
+    <nav class="fp-tab">
+      <div class="fp-tabs">
+        <button class="on"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16.9 7.93v9.47h-3.96v-6.26H7.06v6.26H3.1V7.93L10 2.75l6.9 5.18Z" fill="#000" stroke="#000" stroke-width="1.2"/></svg><span>홈</span></button>
+        <button><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.875 6.5V17h12.25V6.5M8.031 10h3.938M2.125 3h15.75v3.5H2.125V3Z" stroke="#000" stroke-width="1.2"/></svg><span>기록</span></button>
+        <button><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2.6c3.302 0 5.9 2.473 5.9 5.431 0 .451-.067.984-.204 1.486-.138.508-.337.941-.571 1.229L10 17.048l-5.125-6.302c-.55-.677-.775-1.666-.775-2.715C4.1 5.073 6.698 2.6 10 2.6Zm0 2.859c-1.462 0-2.726 1.11-2.726 2.572 0 1.462 1.264 2.573 2.726 2.573 1.462 0 2.726-1.11 2.726-2.573 0-1.462-1.264-2.572-2.726-2.572Z" stroke="#000" stroke-width="1.2"/></svg><span>지도</span></button>
+        <button><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="9.708" cy="6.208" r="2.608" stroke="#000" stroke-width="1.2"/><path d="M3.582 17.001C3.582 13.457 6.455 10.584 10 10.584s6.416 2.873 6.416 6.417H3.582Z" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg><span>마이</span></button>
+      </div>
+    </nav>
+    <div class="fp-over" id="fpOver"><div class="appbody" id="app"></div></div>
   </div>
 </section>
 
@@ -461,7 +510,7 @@ function record(){
   setTimeout(()=>{state.shots.push(shot);save();rec=false;all('.js-rled').forEach(r=>r.classList.remove('on'));renderCounter();const n=state.shots.length;
     toast(n===MAX?'필름이 다 찼어요 · 이제 집에서 현상할 수 있어요':`${n}번째 순간을 담았어요 · ${MAX-n}장 남음`,n===MAX?4000:2200);},3000);
 }
-$('fillBtn').addEventListener('click',()=>fillRoll());
+$('fillBtn').addEventListener('click',()=>{if(mode==='home'){resetFilm();return;}fillRoll();});
 function resetFilm(){state={roll:state.roll,shots:[],developed:false};save();renderCounter();setMode('field');toast('필름을 비웠어요 · 처음부터 다시 담아보세요');}
 function fillRoll(){(()=>{
   if(state.developed){toast('앱에서 새 필름을 넣은 뒤 사용하세요');return;}
@@ -481,19 +530,19 @@ function thumb(s,i){const S=sceneOf(s.sc),d=domOf(s);if(d&&d.ph&&d.ph.length)ret
   const W=S.w,H=S.h,w=W*.18,h=w/1.5,x=Math.max(w/2,Math.min(W-w/2,s.x)),y=Math.max(h/2,Math.min(H-h/2,s.y)),x0=x-w/2,y0=y-h/2;
   return `<div class="amb" style="background-image:url(scenes/${s.sc}-thumb.jpg);background-size:${W/w*100}% auto;background-position:${x0/(W-w)*100}% ${y0/(H-h)*100}%"></div>`;}
 function renderApp(){
-  const a=$('app'),n=state.shots.length;$('rollNo').textContent='ROLL '+String(state.roll).padStart(2,'0');
+  const a=$('app'),n=state.shots.length,full=n>=MAX;$('rollNo').textContent='ROLL '+String(state.roll).padStart(2,'0');
+  $('fpN').textContent=n;$('fpBars').innerHTML=Array.from({length:MAX},(_,i)=>`<i class="${i<n?'f':''}"></i>`).join('');
+  const d=$('dev');d.disabled=!full;d.textContent=full?'현상하기':'현상 준비 중';d.onclick=full&&!state.developed?develop:null;
   if(developing)return;
-  if(state.developed){
+  if(state.developed){$('fpOver').classList.add('on');
     a.innerHTML=`<p style="font-size:12px;color:#8a8a96;margin:4px 2px 12px">${n}개의 순간 · ${hhmm(state.shots[0].t)} – ${hhmm(state.shots[n-1].t)}</p><div class="sheet">${state.shots.map((s,i)=>`<div class="frame"><div class="ph">${thumb(s,i)}<span class="no mono">${String(i+1).padStart(2,'0')}</span></div><div class="meta"><div>${nameOf(s)}<small class="pl">${(sceneOf(s.sc)||{}).name||''}</small><small class="mono">${hhmm(s.t)}</small></div><button class="play" data-i="${i}">▶</button></div></div>`).join('')}</div><button class="cta sub" id="newRoll">새 필름 넣기</button>`;
     a.querySelectorAll('.play').forEach(b=>b.addEventListener('click',()=>playShot(+b.dataset.i,b)));
     $('newRoll').addEventListener('click',()=>{state={roll:state.roll+1,shots:[],developed:false};save();renderApp();renderCounter();toast('새 필름을 넣었어요 · 다시 밖으로 나가볼까요?');});
     return;
   }
-  const full=n>=MAX;
-  a.innerHTML=`<div class="big"><div class="n">${n}<small> / ${MAX}</small></div><p>${full?'필름이 다 찼어요.<br>이제 그날의 소리를 현상할 수 있어요.':`28장을 모두 채워야 현상할 수 있어요.<br>아직 <b>${MAX-n}장</b> 남았어요.`}</p></div><div class="slots">${Array.from({length:MAX},(_,i)=>`<div class="slot ${i<n?'f':''}"></div>`).join('')}</div><button class="cta" id="dev" ${full?'':'disabled'}>${full?'현상하기':'아직 현상할 수 없어요'}</button>`;
-  if(full)$('dev').addEventListener('click',develop);
+  $('fpOver').classList.remove('on');a.innerHTML='';
 }
-function develop(){developing=true;$('app').innerHTML=`<div class="big"><div class="n" style="font-size:34px">현상 중…</div><p>28개의 소리와 장면을 꺼내고 있어요.</p></div><div class="prog"><i id="pg"></i></div>`;
+function develop(){developing=true;$('fpOver').classList.add('on');$('app').innerHTML=`<div class="big"><div class="n" style="font-size:34px">현상 중…</div><p>28개의 소리와 장면을 꺼내고 있어요.</p></div><div class="prog"><i id="pg"></i></div>`;
   let p=0;const iv=setInterval(()=>{p+=2.5;$('pg').style.width=p+'%';if(p>=100){clearInterval(iv);developing=false;state.developed=true;save();renderApp();}},70);}
 let playing=null;
 function playShot(i,b){
@@ -508,7 +557,7 @@ function playShot(i,b){
 }
 
 /* ---------- modes ---------- */
-function setMode(m){mode=m;closeMenu();document.body.classList.toggle('home',m==='home');$('mField').classList.toggle('on',m==='field');$('mHome').classList.toggle('on',m==='home');$('vField').classList.toggle('on',m==='field');$('vHome').classList.toggle('on',m==='home');setMaster();if(m==='home')renderApp();else layout();}
+function setMode(m){mode=m;closeMenu();$('fillBtn').textContent=m==='home'?'리셋하기':'다이얼 채우기';document.body.classList.toggle('home',m==='home');$('mField').classList.toggle('on',m==='field');$('mHome').classList.toggle('on',m==='home');$('vField').classList.toggle('on',m==='field');$('vHome').classList.toggle('on',m==='home');setMaster();if(m==='home')renderApp();else layout();}
 $('mField').addEventListener('click',()=>setMode('field'));$('mHome').addEventListener('click',()=>setMode('home'));
 let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms);}
 (function(){const cv=document.getElementById('ctr2d');if(!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height,SW=7.9,SH=7.9*804/1264,SX=35.0,SY=83.3;
