@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pinch — 사용 시뮬레이션</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap">
+<style>
+:root{--bg:#f4f4f6;--ink:#2b2b33;--mute:#8a8a96;--red:#e2393f;--line:#e2e2ea}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,"Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 24px;pointer-events:none}
+header>*{pointer-events:auto}
+.brand{font-size:20px;font-weight:700;letter-spacing:-.5px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.brand small{font-size:12px;font-weight:400;margin-left:8px;opacity:.85}
+body.home .brand{color:var(--ink);text-shadow:none}
+.modes{display:flex;background:rgba(255,255,255,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;padding:4px}
+.modes button{border:0;background:transparent;padding:8px 16px;border-radius:999px;font-size:14px;cursor:pointer;color:#55555f;font-family:inherit}
+.modes button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.view{display:none;position:fixed;inset:0}.view.on{display:block}
+/* stage */
+.stage{position:absolute;inset:0;overflow:hidden;background:#222;cursor:none;touch-action:none;user-select:none}
+.pano{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.pano img{display:block;pointer-events:none}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba(0,0,0,.35) 100%)}
+.reticle{position:absolute;width:0;height:0;pointer-events:none}
+.reticle .ring{position:absolute;left:-52px;top:-52px;width:104px;height:104px;border-radius:50%;border:2px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+.reticle .dot{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 0 2px rgba(255,255,255,.7)}
+.reticle .wave{position:absolute;left:-52px;top:-52px;width:104px;height:104px;border-radius:50%;border:2px solid var(--red);opacity:0}
+.reticle .lbl{position:absolute;left:62px;top:-13px;white-space:nowrap;background:rgba(30,30,36,.8);color:#fff;font-size:13px;padding:5px 11px;border-radius:999px;opacity:0;transition:opacity .25s}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.tip{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);color:#fff;font-size:13px;background:rgba(30,30,36,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:8px 16px;border-radius:999px;pointer-events:none;transition:opacity .6s;white-space:nowrap}
+/* HUD */
+.hud{position:absolute;right:20px;bottom:20px;width:250px;background:rgba(250,250,252,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:20px;padding:14px 16px 12px;cursor:default;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.hud-top{display:flex;align-items:center;gap:14px}
+.device{position:relative;width:84px;height:134px;flex-shrink:0;margin:14px 6px 8px 14px}
+.body{position:absolute;inset:0;border-radius:16px;background:linear-gradient(160deg,rgba(236,236,244,.98),rgba(214,213,228,.98));border:1px solid #fff;box-shadow:0 6px 14px rgba(60,60,90,.18)}
+.dish{position:absolute;left:-18px;top:-20px;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle,#d8d7e8 0 34%,#c4c3da 35% 60%,#b7b6cf 61% 100%);box-shadow:0 3px 8px rgba(60,60,90,.2);cursor:ns-resize;touch-action:none}
+.mic{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px;border-radius:50%;background:var(--red)}
+.mic i{position:absolute;width:3px;height:3px;border-radius:50%;background:#3a1416}
+.tick{position:absolute;left:50%;top:50%;width:5px;height:12px;margin:-6px -2.5px;background:var(--red);border-radius:1px}
+.lens{position:absolute;right:13px;top:18px;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#6c7380 0 12%,#1d2026 30%,#111 70%);box-shadow:0 0 0 2px #e4e4ee}
+.btn{position:absolute;right:-7px;top:52px;width:11px;height:34px;border:0;border-radius:3px;background:var(--red);cursor:pointer;box-shadow:1px 1px 0 rgba(0,0,0,.15);transition:transform .08s}
+.btn.press{transform:translateX(-2px)}
+.pled{position:absolute;right:9px;bottom:14px;width:5px;height:5px;border-radius:50%;background:#cfcfd8}
+.pled.on{background:#54d07a;box-shadow:0 0 5px #54d07a}
+.logo{position:absolute;left:11px;bottom:12px;writing-mode:vertical-rl;transform:rotate(180deg);font-size:14px;font-weight:300;color:#fff}
+.side{flex:1;display:flex;flex-direction:column;gap:8px}
+.counter{background:#141418;color:#ff5a5f;font-size:20px;padding:6px 8px;border-radius:6px;text-align:center;letter-spacing:1px}
+.counter.off{color:#3a3a42}
+.rled{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--mute)}
+.rled b{width:8px;height:8px;border-radius:50%;background:#e5c9ca;display:inline-block}
+.rled.on b{background:var(--red);box-shadow:0 0 8px var(--red);animation:blink .5s infinite alternate}
+@keyframes blink{to{opacity:.3}}
+.chip{font-size:11px;color:#55555f;display:flex;justify-content:space-between}
+.vol{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mute);margin-top:4px}
+.vol input{flex:1;accent-color:var(--red)}
+.hint{font-size:11px;color:var(--mute);line-height:1.6;margin-top:8px}
+.hint b{color:var(--ink);font-weight:600}
+.ghost{margin-top:8px;width:100%;border:1px dashed #c9c9d4;background:transparent;color:var(--mute);font-size:11px;padding:7px;border-radius:9px;cursor:pointer;font-family:inherit}
+/* app */
+#vHome{background:var(--bg);overflow:auto}
+.home{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;padding:80px 20px 30px}
+.phone{width:350px;height:700px;border-radius:46px;background:#111;padding:12px;box-shadow:0 20px 50px rgba(0,0,0,.18)}
+.screen{width:100%;height:100%;border-radius:36px;background:#f7f6f2;overflow:hidden;display:flex;flex-direction:column}
+.bar{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:12px;font-weight:600}
+.apphead{padding:8px 22px 14px;display:flex;justify-content:space-between;align-items:flex-end}
+.apphead h2{font-size:24px;font-weight:700;letter-spacing:-.5px}
+.apphead span{font-size:11px;color:var(--mute)}
+.appbody{flex:1;overflow-y:auto;padding:0 18px 22px}
+.big{text-align:center;padding:26px 0 18px}
+.big .n{font-size:56px;font-weight:300;letter-spacing:-2px}
+.big .n small{font-size:20px;color:var(--mute)}
+.big p{font-size:13px;color:var(--mute);line-height:1.6;margin-top:6px}
+.slots{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:10px}
+.slot{aspect-ratio:3/4;border-radius:3px;background:#e7e5df}
+.slot.f{background:#2a2622}
+.cta{display:block;width:100%;margin-top:22px;border:0;background:var(--red);color:#fff;font-size:15px;font-weight:600;padding:14px;border-radius:14px;cursor:pointer;font-family:inherit}
+.cta:disabled{background:#d9d7d1;color:#a5a29b;cursor:not-allowed}
+.cta.sub{background:#ebe9e3;color:var(--ink)}
+.prog{height:4px;background:#e7e5df;border-radius:4px;overflow:hidden;margin:20px 0 8px}
+.prog i{display:block;height:100%;width:0;background:var(--red);transition:width .1s linear}
+.sheet{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.frame{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.frame .ph{position:relative;aspect-ratio:3/2;background:#ddd}
+.frame img,.frame svg{display:block;width:100%;height:100%;object-fit:cover}
+.frame svg{filter:sepia(.3) saturate(.8)}
+.frame .no{position:absolute;left:6px;top:5px;font-size:10px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.frame .meta{display:flex;align-items:center;justify-content:space-between;padding:7px 8px;gap:6px}
+.frame .meta div{font-size:11px;line-height:1.35}
+.frame .meta small{color:var(--mute);font-size:10px}
+.play{width:28px;height:28px;border-radius:50%;border:0;background:var(--ink);color:#fff;font-size:10px;cursor:pointer;flex-shrink:0}
+.play.on{background:var(--red)}
+.sidetxt{max-width:300px;font-size:14px;line-height:1.75;color:#55555f;padding-top:30px}
+.sidetxt h4{font-size:18px;color:var(--ink);margin-bottom:10px}
+.sidetxt p{margin-bottom:12px}
+.toast{position:fixed;left:50%;top:76px;transform:translateX(-50%) translateY(-10px);background:rgba(30,30,36,.88);color:#fff;font-size:13px;padding:10px 18px;border-radius:999px;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center;z-index:30}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.lay{display:flex;background:rgba(255,255,255,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;padding:4px;margin-right:8px}
+.lay button{border:0;background:transparent;padding:8px 14px;border-radius:999px;font-size:13px;cursor:pointer;color:#55555f;font-family:inherit}
+.lay button.on{background:var(--ink);color:#fff}
+.right{display:flex;align-items:center}
+.reticle{left:0;top:0;transition:opacity .2s}
+.edge{position:absolute;top:0;bottom:0;width:16%;pointer-events:none;opacity:0;transition:opacity .3s}
+.edge.l{left:0;background:linear-gradient(90deg,rgba(255,255,255,.18),transparent)}
+.edge.r{right:0;background:linear-gradient(-90deg,rgba(255,255,255,.18),transparent)}
+/* ---- 시안 A: held device (back view) ---- */
+.held{position:absolute;right:7%;bottom:-150px;width:250px;height:420px;cursor:default;z-index:5;transition:bottom .4s}
+.held{pointer-events:none}.held .hbtn{pointer-events:auto}.held .hdish{position:absolute;right:-92px;top:-78px;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle at 45% 40%,#c9c8dd 0 55%,#a9a8c4 80%,#9897b4 100%);box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:ns-resize;touch-action:none}
+.held .tick{position:absolute;left:50%;top:50%;width:12px;height:30px;margin:-15px -6px;background:var(--red);border-radius:2px}
+.held .hbody{position:absolute;inset:0;border-radius:44px;background:linear-gradient(165deg,rgba(236,236,245,.97),rgba(205,204,222,.97));border:2px solid rgba(255,255,255,.9);box-shadow:0 20px 50px rgba(0,0,0,.45),inset 0 0 0 10px rgba(255,255,255,.25)}
+.held .hinner{position:absolute;left:22px;right:22px;top:22px;bottom:22px;border-radius:30px;border:1px solid rgba(255,255,255,.7);background:rgba(190,189,210,.35)}
+.held .hscreen{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:#0f0f13;border-radius:8px;padding:10px 14px;box-shadow:inset 0 0 0 2px #26262e}
+.held .counter{background:none;padding:0;font-size:34px;letter-spacing:2px}
+.held .rled{position:absolute;left:50%;top:150px;transform:translateX(-50%);font-size:12px;color:#7d7c94}
+.held .rled b{width:10px;height:10px}
+.held .hled{position:absolute;left:50%;top:180px;margin-left:-4px;width:8px;height:8px;border-radius:50%;background:#bdbccd}
+.held .hled.on{background:#54d07a;box-shadow:0 0 8px #54d07a}
+.held .hlabel{position:absolute;left:0;right:0;top:206px;text-align:center;font-size:9px;color:#8f8ea8;line-height:1.5}
+.held .hbtn{position:absolute;left:-16px;top:120px;width:22px;height:84px;border:0;border-radius:5px;background:var(--red);cursor:pointer;box-shadow:-3px 4px 10px rgba(0,0,0,.3);transition:transform .08s}
+.held .hbtn.press{transform:translateX(4px)}
+.held .hcap{position:absolute;right:calc(100% + 30px);top:118px;white-space:nowrap;font-size:12px;color:#fff;background:rgba(30,30,36,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:6px 11px;border-radius:999px;pointer-events:none}
+.held .hcap2{top:30px;right:auto;left:calc(100% + 130px)}
+.aside-a{position:absolute;left:16px;bottom:16px;width:250px;padding:12px 14px !important;background:rgba(250,250,252,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px;padding:14px 16px;cursor:default;box-shadow:0 10px 30px rgba(0,0,0,.18);z-index:6}
+.aside-a .chip{margin-bottom:6px}
+/* ---- 시안 B: right panel ---- */
+.panelB{display:none;position:absolute;top:0;right:0;bottom:0;width:360px;background:#fafafc;border-left:1px solid var(--line);padding:84px 28px 24px;overflow-y:auto;cursor:default}
+body.lb .stage{right:360px}
+body.lb .panelB{display:block}
+body.lb .held,body.lb .aside-a{display:none}
+body.lb header .brand{color:#fff}
+.panelB h3{font-size:12px;color:var(--mute);font-weight:500;letter-spacing:.6px;margin-bottom:10px}
+.devB{position:relative;width:200px;height:318px;margin:58px auto 26px}
+.devB .body{border-radius:36px}
+.devB .dish{left:-44px;top:-48px;width:164px;height:164px}
+.devB .mic{width:68px;height:68px;margin:-34px}
+.devB .mic i{width:7px;height:7px}
+.devB .tick{width:9px;height:26px;margin:-13px -4.5px}
+.devB .lens{right:30px;top:42px;width:36px;height:36px;box-shadow:0 0 0 5px #e4e4ee}
+.devB .btn{right:-11px;top:124px;width:19px;height:74px;border-radius:4px}
+.devB .pled{right:20px;bottom:34px;width:8px;height:8px}
+.devB .logo{left:24px;bottom:28px;font-size:30px}
+.devB .loop{position:absolute;left:50%;bottom:-18px;width:70px;height:24px;margin-left:-35px;border-radius:0 0 12px 12px;background:rgba(232,232,240,.95);border:1px solid #fff}
+.backB{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:18px}
+.backB .counter{font-size:28px;padding:8px 16px;min-width:130px}
+.rowB{display:flex;align-items:center;justify-content:space-between;font-size:14px;padding:11px 0;border-top:1px solid var(--line)}
+.rowB span:first-child{color:var(--mute)}
+.rowB input{width:150px;accent-color:var(--red)}
+.panelB .hint{font-size:12.5px;margin-top:14px}
+
+
+.blurbg{position:absolute;left:-60px;top:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(40px) brightness(.75) saturate(1.1);pointer-events:none}
+.place{border:0;background:rgba(255,255,255,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;padding:12px 16px;font-size:13px;color:#33333b;cursor:pointer;margin-right:8px;font-family:inherit}
+.place b{font-weight:600}
+.picker{position:fixed;inset:0;z-index:40;background:rgba(20,20,26,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:20px}
+.picker.on{display:flex}
+.pk-in{background:#fafafc;border-radius:26px;padding:34px 34px 26px;max-width:980px;width:100%;max-height:92vh;overflow:auto;position:relative}
+.pk-in h2{font-size:26px;letter-spacing:-.5px;margin-bottom:6px}
+.pk-in>p{font-size:14px;color:var(--mute);margin-bottom:22px;line-height:1.6}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.card{border:0;padding:0;text-align:left;background:#fff;border-radius:18px;overflow:hidden;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.06);transition:transform .15s,box-shadow .15s;font-family:inherit}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.12)}
+.card .cimg{height:150px;background-size:cover;background-position:center}
+.card .cbody{padding:14px 16px 16px}
+.card h3{font-size:17px;margin-bottom:4px;color:var(--ink)}
+.card p{font-size:12.5px;color:var(--mute);line-height:1.55}
+.card.cur{outline:3px solid var(--red)}
+.pk-close{position:absolute;right:20px;top:18px;border:0;background:#ececf2;border-radius:999px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:13px;color:#55555f}
+.loading{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;background:rgba(20,20,26,.35);color:#fff;font-size:14px}
+.loading.on{display:flex}
+.loading div{display:flex;align-items:center;gap:12px;background:rgba(30,30,36,.8);padding:14px 20px;border-radius:999px}
+.loading i{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.edge.t{left:0;right:0;top:0;height:13%;width:auto;bottom:auto;background:linear-gradient(180deg,rgba(255,255,255,.16),transparent)}
+.edge.b{left:0;right:0;bottom:0;height:13%;width:auto;top:auto;background:linear-gradient(0deg,rgba(255,255,255,.16),transparent)}
+.held{width:210px;height:350px;bottom:-140px;right:6%;transition:opacity .25s}
+.held{pointer-events:none}.held .hbtn{pointer-events:auto}.held .hdish{width:170px;height:170px;right:-74px;top:-64px}
+.held .hscreen{top:58px}.held .counter{font-size:28px}
+.held .rled{top:128px}.held .hled{top:154px}.held .hlabel{top:176px}
+.held .hbtn{top:100px;height:72px}
+.held .hcap{top:98px}
+.held.dodge{bottom:-300px;opacity:.6}
+.frame .meta div small.pl{display:block;color:#b0aea6}
+@media (max-width:700px){.cards{grid-template-columns:1fr}}
+
+@media (max-width:700px){.hud{left:12px;right:12px;width:auto;bottom:12px}.tip{bottom:auto;top:70px}.sidetxt{display:none}.brand small{display:none}}
+
+.frame .amb{width:100%;height:100%;background-repeat:no-repeat;filter:sepia(.2) saturate(.85)}
+.brand{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;padding:9px 18px;color:#33333b !important;text-shadow:none !important}
+.brand img{height:20px;display:block}
+.brand small{margin-left:0 !important;color:#55555f;opacity:1 !important}
+body.home .brand{background:transparent;padding-left:0;backdrop-filter:none;-webkit-backdrop-filter:none}
+.held{width:300px !important;height:546px !important;bottom:-70px !important;right:4% !important}
+.held .devimg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;user-select:none;filter:drop-shadow(0 18px 30px rgba(0,0,0,.35)) drop-shadow(0 2px 4px rgba(0,0,0,.2))}
+.held .ctr2d{position:absolute;left:33.6%;top:27.2%;width:13%;height:4.4%;pointer-events:none;border-radius:1px}
+.held .recglow{position:absolute;left:18.25%;top:38.6%;width:2.2%;height:1.2%;border-radius:50%;pointer-events:none;opacity:0;background:#ff3b40;box-shadow:0 0 6px 2px #ff3b40,0 0 14px 4px rgba(255,40,40,.5)}
+.held .recglow.on{animation:recb .5s infinite alternate}
+@keyframes recb{from{opacity:1}to{opacity:.15}}
+.held #hbtn3d{left:0;top:32.9%;width:6.6%;height:11.4%}
+.held #hbtn3d.press{box-shadow:inset 3px 0 6px rgba(0,0,0,.35) !important}
+.held #hcap3d{left:-12px !important;top:38.6% !important;transform:translate(-100%,-50%) !important;margin:0 !important}
+.held3d{position:absolute;inset:0;pointer-events:none}
+.held3d canvas{display:block;width:100%;height:100%}
+.held .hbtn{position:absolute;background:transparent !important;box-shadow:none !important;border:0;border-radius:6px;cursor:pointer;transform:none !important}
+.held .hbtn:hover{outline:2px solid rgba(255,255,255,.7);outline-offset:1px}
+.held #hcap3d{position:absolute;top:auto;right:auto;white-space:nowrap;transform:translate(-100%,-50%);margin-left:-14px}
+.devB3{position:relative;width:100%;height:440px;margin:0 0 10px}
+.b3d{position:absolute;inset:0}
+.b3d canvas{display:block;width:100%;height:100%}
+.devB3 .hbtn{position:absolute;background:transparent;border:0;border-radius:6px;cursor:pointer}
+.devB3 .hbtn:hover{outline:2px solid rgba(43,43,51,.35);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><img src="logo.svg" alt="Pinch"><small>Sound Collection Device · 사용 시뮬레이션</small></div>
+  <div class="right"><div class="lay" id="lay"><button data-l="la" class="on">시안 A · 손에 든 기기</button><button data-l="lb">시안 B · 오른쪽 패널</button></div><button class="place" id="placeBtn">장소 · <b id="placeName">고르기</b> ▾</button><div class="modes"><button id="mField" class="on">현장</button><button id="mHome">집 · Pinch 앱</button></div></div>
+</header>
+
+<section class="view on" id="vField">
+  <div class="stage" id="stage">
+    <img class="blurbg" id="blurImg" alt=""><div class="pano" id="pano"><img id="panoImg" alt=""></div>
+    <div class="vig"></div>
+    <div class="reticle" id="ret"><div class="wave" id="wave"></div><div class="ring"></div><div class="dot"></div><div class="lbl" id="lbl"></div></div>
+    <div class="flash" id="flash"></div>
+    <div class="tip" id="tip">마우스로 장면 속 작은 소리를 찾아 겨눠 보세요 · 빨간 버튼을 길게 눌러 전원을 켜세요</div>
+    <div class="edge l" id="edgeL"></div><div class="edge r" id="edgeR"></div><div class="edge t" id="edgeT"></div><div class="edge b" id="edgeB"></div>
+    <!-- 시안 A -->
+    <div class="held" id="held">
+      <img class="devimg" src="device_back.png" alt="Pinch 뒷면" draggable="false">
+      <canvas class="ctr2d" id="ctr2d" width="1264" height="688"></canvas>
+      <div class="recglow" id="recglow"></div>
+      <div class="held3d" id="held3d"></div>
+      <button class="hbtn js-btn" id="hbtn3d" aria-label="전원/채집 버튼"></button>
+      <div class="hcap" id="hcap3d">길게: 전원 · 짧게: 채집</div>
+    </div>
+    <aside class="aside-a">
+      <div class="chip"><span>무선 이어폰</span><span class="js-bt">—</span></div>
+      <div class="chip"><span>휴대폰</span><span>주머니 속</span></div>
+      <div class="vol">볼륨<input type="range" class="js-vol" min="0" max="100" value="70"></div>
+      <p class="hint"><b>Space</b>로도 채집할 수 있어요. 이어폰을 끼면 방향도 느껴져요.</p>
+      <button class="ghost js-demo">전시용 데모 · 남은 장 자동으로 채우기</button>
+    </aside>
+  </div>
+  <aside class="panelB">
+    <h3>DEVICE</h3>
+    <div class="devB3">
+      <div class="b3d" id="b3d"></div>
+      <button class="hbtn js-btn" id="hbtnB" aria-label="전원/채집 버튼"></button>
+    </div>
+    <div class="backB"><div class="counter mono off js-counter">--</div><div class="rled js-rled"><b></b>REC</div></div>
+    <div class="rowB"><span>볼륨</span><input type="range" class="js-vol" min="0" max="100" value="70"></div>
+    <div class="rowB"><span>무선 이어폰</span><span class="js-bt">—</span></div>
+    <div class="rowB"><span>휴대폰</span><span>주머니 속</span></div>
+    <p class="hint"><b>빨간 버튼 길게</b>: 전원 켜기/끄기<br><b>짧게</b> 또는 <b>Space</b>: 소리+장면 채집 (3초)<br>마우스로 장면 속을 겨눠 소리를 찾아보세요.</p>
+    <button class="ghost js-demo">전시용 데모 · 남은 장 자동으로 채우기</button>
+  </aside>
+</section>
+
+<section class="view" id="vHome">
+  <div class="home">
+    <div class="phone"><div class="screen">
+      <div class="bar"><span>9:41</span><span>●●● ▮</span></div>
+      <div class="apphead"><h2><img src="logo.svg" alt="Pinch" style="height:24px;display:block"></h2><span class="mono" id="rollNo">ROLL 01</span></div>
+      <div class="appbody" id="app"></div>
+    </div></div>
+    <div class="sidetxt">
+      <h4>현장에선 귀로, 집에선 기록으로</h4>
+      <p>필름 카메라처럼, 28장을 모두 채우기 전에는 무엇을 담았는지 볼 수 없습니다.</p>
+      <p>현상한 뒤에야 그날의 소리와 장면을 다시 꺼내 들을 수 있어요.</p>
+      <p>공유 버튼은 없습니다. 오직 나를 위한 기록이니까요.</p>
+    </div>
+  </div>
+</section>
+
+<div class="picker" id="picker">
+  <div class="pk-in">
+    <h2>어디로 가볼까요?</h2>
+    <p>장소를 고르면, 그곳의 작은 소리들을 찾아 담을 수 있어요. 한 롤(28장)에 여러 장소를 섞어 담아도 돼요.</p>
+    <div class="cards" id="cards"></div>
+    <button class="pk-close" id="pkClose">닫기</button>
+  </div>
+</div>
+<div class="loading" id="loading"><div><i></i><span id="loadTxt">장소를 불러오는 중…</span></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const MAX=28;
+const SCENES=[{"id": "beach", "name": "제주 바닷가", "desc": "현무암에 부서지는 파도, 몽돌, 갈매기, 포구의 어선", "w": 2560, "h": 1072, "r": 120, "start": [1280, 590], "src": [{"id": "breakwater", "name": "방파제 파도", "x": 672, "y": 528, "lv": 0.8, "ph": ["breakwater"]}, {"id": "shore", "name": "현무암 사이 파도", "x": 432, "y": 720, "lv": 0.6, "ph": ["shore"]}, {"id": "pebbles", "name": "몽돌 구르는 소리", "x": 640, "y": 976, "lv": 0.9, "ph": ["pebbles"]}, {"id": "gulls", "name": "갈매기", "x": 795, "y": 160, "lv": 0.9, "ph": ["gulls"]}, {"id": "boat", "name": "어선 엔진", "x": 1744, "y": 552, "lv": 0.9, "ph": ["boat"]}, {"id": "grass", "name": "바닷바람에 흔들리는 풀", "x": 2240, "y": 960, "lv": 0.7, "ph": ["grass"]}]}, {"id": "park", "name": "도시 숲 공원", "desc": "이른 아침의 분수, 까치, 비둘기, 스프링클러, 도시의 소리", "w": 2560, "h": 1072, "r": 120, "start": [1280, 590], "src": [{"id": "magpie", "name": "까치", "x": 248, "y": 720, "lv": 0.9, "ph": ["magpie"]}, {"id": "bike", "name": "공공자전거", "x": 720, "y": 672, "lv": 0.8, "ph": ["bike"]}, {"id": "pigeons", "name": "비둘기", "x": 800, "y": 816, "lv": 0.9, "ph": ["pigeons"]}, {"id": "sprinkler", "name": "스프링클러", "x": 1584, "y": 640, "lv": 0.8, "ph": ["sprinkler"]}, {"id": "sparrows", "name": "덤불 속 참새", "x": 1728, "y": 728, "lv": 0.9, "ph": ["sparrows"]}, {"id": "fountain", "name": "분수", "x": 2368, "y": 832, "lv": 0.7, "ph": ["fountain"]}, {"id": "traffic", "name": "멀리 차 소리", "x": 2240, "y": 648, "lv": 0.55, "ph": ["traffic"]}, {"id": "trees", "name": "나뭇잎 소리", "x": 2160, "y": 240, "lv": 0.7, "ph": ["trees"]}]}, {"id": "summit", "name": "설악 능선 정상", "desc": "구름바다 위 바람, 소나무, 까마귀, 매, 먼 폭포", "w": 2560, "h": 1072, "r": 120, "start": [1280, 590], "src": [{"id": "pine", "name": "바람 맞는 소나무", "x": 320, "y": 528, "lv": 0.8, "ph": ["pine"]}, {"id": "crow", "name": "큰부리까마귀", "x": 688, "y": 480, "lv": 0.9, "ph": ["crow"]}, {"id": "hawk", "name": "매", "x": 1104, "y": 216, "lv": 0.9, "ph": ["hawk"]}, {"id": "wind", "name": "구름 위 바람", "x": 1920, "y": 416, "lv": 0.75, "ph": ["wind"]}, {"id": "falls", "name": "먼 폭포", "x": 2032, "y": 672, "lv": 0.5, "ph": ["falls"]}, {"id": "insects", "name": "풀벌레", "x": 2464, "y": 896, "lv": 0.5, "ph": ["insects"]}]}, {"id": "camp", "name": "강원 계곡 캠핑장", "desc": "계곡물, 개구리, 화로대 불, 주전자, 매미, 딱따구리", "w": 2560, "h": 1072, "r": 120, "start": [1280, 590], "src": [{"id": "stream", "name": "계곡 물소리", "x": 560, "y": 840, "lv": 0.7, "ph": ["stream"]}, {"id": "frog", "name": "개구리", "x": 1064, "y": 888, "lv": 0.9, "ph": ["frog"]}, {"id": "cicada", "name": "매미", "x": 976, "y": 480, "lv": 0.6, "ph": ["cicada"]}, {"id": "birds", "name": "새소리", "x": 1096, "y": 70, "lv": 0.9, "ph": ["birds"]}, {"id": "woodpecker", "name": "숨은 딱따구리", "x": 1536, "y": 400, "lv": 1, "ph": ["woodpecker"]}, {"id": "fire", "name": "화로대 불", "x": 1816, "y": 712, "lv": 0.9, "ph": ["fire"]}, {"id": "kettle", "name": "끓는 주전자", "x": 1944, "y": 680, "lv": 0.8, "ph": ["kettle"]}, {"id": "leaves", "name": "나뭇잎 소리", "x": 2240, "y": 192, "lv": 0.65, "ph": ["leaves"]}]}];
+const $=id=>document.getElementById(id),all=c=>document.querySelectorAll(c);
+let scene=null,SRC=[],PW=3840,PH=1536,R0=185;
+let power=false,vol=.7,rec=false,mode='field';
+let state={roll:1,shots:[],developed:false};
+try{const s=JSON.parse(localStorage.getItem('pinch-v4'));if(s&&Array.isArray(s.shots))state=s;}catch(e){}
+function save(){try{localStorage.setItem('pinch-v4',JSON.stringify(state))}catch(e){}}
+const focusOf=(s,x,y)=>Math.exp(-Math.pow(Math.hypot(s.x-x,(s.y-y)*1.2)/R0,2));
+const sceneOf=id=>SCENES.find(s=>s.id===id);
+
+/* ---------- camera ---------- */
+const stage=$('stage'),pano=$('pano'),ret=$('ret'),held=$('held');
+let sw=0,sh=0,sc=1,cam={x:1920,y:900},ptr={x:0,y:0,in:false,ui:false},moved=false,last=performance.now(),keys={};
+let offY=0,dodge=false,ctlT=null;
+function layout(){sw=stage.clientWidth;sh=stage.clientHeight;sc=Math.max(sw/PW,sh/PH);if(!ptr.x){ptr.x=sw/2;ptr.y=sh/2;}clampCam();}
+function camTarget(){const hw=sw/2/sc,hh=sh/2/sc,fx=Math.min(1,Math.max(0,ptr.x/sw)),fy=Math.min(1,Math.max(0,ptr.y/sh));return{x:hw+fx*(PW-2*hw),y:hh+fy*(PH-2*hh)};}
+function clampCam(){const hw=sw/2/sc,hh=sh/2/sc;cam.x=Math.max(hw,Math.min(PW-hw,cam.x));cam.y=Math.max(hh,Math.min(PH-hh,cam.y));}
+addEventListener('resize',layout);
+function setPtr(e){const r=stage.getBoundingClientRect();ptr.x=e.clientX-r.left;ptr.y=e.clientY-r.top;ptr.in=true;
+  const overCtl=!!e.target.closest('.hbtn');let inDev=false;
+  if(held&&document.body.classList.contains('la')){const h=held.getBoundingClientRect();inDev=e.clientX>h.left-30&&e.clientX<h.right+90&&e.clientY>h.top-90;}
+  dodge=false;
+  ptr.ui=overCtl||!!e.target.closest('.aside-a');}
+stage.addEventListener('pointermove',e=>{setPtr(e);if(!moved){moved=true;setTimeout(()=>$('tip').style.opacity=0,3500);}});
+stage.addEventListener('pointerleave',()=>{ptr.in=false;});
+stage.addEventListener('pointerdown',e=>{initAudio();if(e.pointerType!=='mouse')setPtr(e);});
+addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS'].includes(e.code)){keys[e.code]=1;e.preventDefault();}});
+addEventListener('keyup',e=>{delete keys[e.code];});
+stage.addEventListener('wheel',e=>{if(e.target.closest('.aside-a'))return;e.preventDefault();setVol(vol-e.deltaY/1200);},{passive:false});
+const aimPt=()=>({x:cam.x+(ptr.x-sw/2)/sc,y:cam.y+(ptr.y-sh/2)/sc});
+
+/* ---------- audio ---------- */
+let ctx=null,master=null,live={},bufCache={},liveScene=null;
+function initAudio(){
+  if(ctx){if(ctx.state==='suspended')ctx.resume().catch(()=>{});return true;}
+  try{ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return false;}
+  master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
+  if(scene)loadSounds(scene.id);
+  return true;
+}
+const rawCache={};
+function fetchRaw(sid,id){const k=sid+'/'+id;if(!rawCache[k])rawCache[k]=fetch(`sounds/${sid}/${id}.mp3`).then(r=>r.arrayBuffer()).catch(()=>null);return rawCache[k];}
+function loadSounds(sid){
+  const sc_=sceneOf(sid);
+  if(!bufCache[sid])bufCache[sid]=Promise.all(sc_.src.map(s=>fetchRaw(sid,s.id).then(ab=>{
+    if(!ab||!ctx)return [s.id,null];
+    return new Promise(res=>ctx.decodeAudioData(ab.slice(0),b=>res([s.id,b]),()=>res([s.id,null])));}))).then(a=>Object.fromEntries(a));
+  return bufCache[sid];
+}
+function chain(buf,dest,withPan){
+  const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;let node=src,pan=null;
+  if(withPan&&ctx.createStereoPanner){pan=ctx.createStereoPanner();node.connect(pan);node=pan;}
+  const g=ctx.createGain();g.gain.value=0;node.connect(g);g.connect(dest);return{src,g,pan};
+}
+function stopLive(){Object.values(live).forEach(c=>{try{c.g.gain.setTargetAtTime(0,ctx.currentTime,.15);c.src.stop(ctx.currentTime+.6);}catch(e){}});live={};liveScene=null;}
+function ensureLive(){
+  if(!ctx||!power||!scene||liveScene===scene.id)return;
+  stopLive();const sid=scene.id;liveScene=sid;
+  loadSounds(sid).then(b=>{if(liveScene!==sid)return;scene.src.forEach(s=>{if(!b[s.id])return;const c=chain(b[s.id],master,true);c.src.start(0,Math.random()*4);live[s.id]=c;});});
+}
+const gainFor=(lv,f,v)=>v*(lv||.8)*(.035+.965*Math.pow(f,1.3))*1.5;
+function setMaster(){if(ctx)master.gain.setTargetAtTime(power&&mode==='field'?.9:0,ctx.currentTime,.25);}
+
+/* ---------- loop ---------- */
+const lbl=$('lbl'),wave=$('wave');let wph=0,aim={x:cam.x,y:cam.y};
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  let vx=0,vy=0;
+  if(false){const zx=sw*.14,zy=sh*.12;
+    if(ptr.x<zx)vx=-Math.pow(1-ptr.x/zx,1.5);else if(ptr.x>sw-zx)vx=Math.pow(1-(sw-ptr.x)/zx,1.5);
+    if(ptr.y<zy)vy=-Math.pow(1-ptr.y/zy,1.5);else if(ptr.y>sh-zy)vy=Math.pow(1-(sh-ptr.y)/zy,1.5);}
+  if(ptr.in&&!ptr.ui){const tg=camTarget(),k=1-Math.pow(.0005,dt);cam.x+=(tg.x-cam.x)*k;cam.y+=(tg.y-cam.y)*k;}clampCam();
+  $('edgeL').style.opacity=vx<0?Math.min(1,-vx*2):0;$('edgeR').style.opacity=vx>0?Math.min(1,vx*2):0;
+  $('edgeT').style.opacity=vy<0?Math.min(1,-vy*2):0;$('edgeB').style.opacity=vy>0?Math.min(1,vy*2):0;
+  pano.style.transform=`translate(${sw/2-cam.x*sc}px,${sh/2-cam.y*sc}px) scale(${sc})`;
+  ret.style.transform=`translate(${ptr.x}px,${ptr.y}px)`;ret.style.opacity=ptr.ui?0:1;stage.style.cursor=ptr.ui?'default':'none';
+  if(!ptr.ui)aim=aimPt();
+  if(held){const ox=ptr.x/sw-.5,oy=ptr.y/sh-.5;held.style.transform=`translate(${ox*24}px,${oy*14}px) rotate(${-5+ox*4}deg)`;held.style.opacity=1;
+}
+  const fs=SRC.map(s=>focusOf(s,aim.x,aim.y));let bi=0;fs.forEach((f,i)=>{if(f>fs[bi])bi=i;});
+  const flip=ptr.x>sw-260;lbl.style.left=flip?'auto':'62px';lbl.style.right=flip?'62px':'auto';if(power&&SRC.length&&fs[bi]>.4&&!ptr.ui){lbl.textContent=SRC[bi].name;lbl.style.opacity=1;}else lbl.style.opacity=0;
+  wph=(wph+.02)%1;const amp=power&&SRC.length?fs[bi]:0;wave.style.opacity=(1-wph)*amp;wave.style.transform=`scale(${1+wph*1.3})`;
+  if(ctx&&liveScene&&scene&&liveScene===scene.id){const t=ctx.currentTime,hw=sw/2/sc;SRC.forEach((s,i)=>{const c=live[s.id];if(!c)return;c.g.gain.setTargetAtTime(gainFor(s.lv,fs[i],vol),t,.08);if(c.pan)c.pan.pan.setTargetAtTime(Math.max(-1,Math.min(1,(s.x-aim.x)/(PW*.35))),t,.1);});}
+  requestAnimationFrame(frame);
+}
+
+/* ---------- places ---------- */
+function buildCards(){$('cards').innerHTML=SCENES.map(s=>`<button class="card ${scene&&scene.id===s.id?'cur':''}" data-id="${s.id}"><div class="cimg" style="background-image:url(scenes/${s.id}-thumb.jpg)"></div><div class="cbody"><h3>${s.name}</h3><p>${s.desc}</p></div></button>`).join('');
+  all('.card').forEach(c=>c.addEventListener('click',()=>{initAudio();goScene(c.dataset.id);}));}
+function goScene(id){
+  const s=sceneOf(id);$('picker').classList.remove('on');if(scene&&scene.id===id)return;
+  $('loading').classList.add('on');
+  const img=new Image();img.onload=()=>{
+    scene=s;SRC=s.src;PW=s.w;PH=s.h;R0=s.r||185;
+    $('panoImg').src=img.src;$('panoImg').width=PW;$('panoImg').height=PH;$('blurImg').src=`scenes/${id}-thumb.jpg`;
+    $('placeName').textContent=s.name;layout();cam.x=s.start?s.start[0]:PW/2;cam.y=s.start?s.start[1]:PH*.55;clampCam();
+    $('loading').classList.remove('on');ensureLive();if(ctx)loadSounds(id);
+    if(mode!=='field')setMode('field');toast(`${s.name}에 도착했어요`);
+  };
+  img.onerror=()=>{$('loading').classList.remove('on');toast('장소를 불러오지 못했어요');};
+  img.src=`scenes/${id}.jpg`;
+}
+$('placeBtn').addEventListener('click',()=>{buildCards();$('pkClose').style.display=scene?'block':'none';$('picker').classList.add('on');});
+$('pkClose').addEventListener('click',()=>{if(scene)$('picker').classList.remove('on');});
+
+/* ---------- device ---------- */
+all('.js-mic').forEach(m=>{[[0,0],[-15,-9],[15,-9],[-15,9],[15,9],[0,-18],[0,18]].forEach(p=>{const i=document.createElement('i');i.style.left=(31+p[0])+'px';i.style.top=(31+p[1])+'px';m.appendChild(i);});});
+function setVol(v){vol=Math.max(0,Math.min(1,v));all('.js-vol').forEach(x=>x.value=Math.round(vol*100));
+  all('.js-tick').forEach(t=>{const r=t.parentElement.offsetWidth/2-18;t.style.transform=`rotate(${-135+vol*270}deg) translateY(-${Math.max(20,r)}px)`;});}
+all('.js-vol').forEach(x=>x.addEventListener('input',e=>setVol(e.target.value/100)));
+all('.js-dish').forEach(d=>{let dy=null;
+  d.addEventListener('wheel',e=>{e.preventDefault();setVol(vol-e.deltaY/1000);},{passive:false});
+  d.addEventListener('pointerdown',e=>{dy=e.clientY;try{d.setPointerCapture(e.pointerId);}catch(_){}});
+  d.addEventListener('pointermove',e=>{if(dy===null)return;setVol(vol+(dy-e.clientY)/150);dy=e.clientY;});
+  d.addEventListener('pointerup',()=>dy=null);});
+all('.js-btn').forEach(btn=>{let pressT=null,longDone=false;
+  btn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();initAudio();longDone=false;btn.classList.add('press');pressT=setTimeout(()=>{longDone=true;togglePower();},700);});
+  btn.addEventListener('pointerup',()=>{btn.classList.remove('press');if(pressT){clearTimeout(pressT);pressT=null;if(!longDone)record();}});
+  btn.addEventListener('pointerleave',()=>{btn.classList.remove('press');if(pressT){clearTimeout(pressT);pressT=null;}});
+  btn.addEventListener('contextmenu',e=>e.preventDefault());});
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&mode==='field'&&!e.repeat&&!$('picker').classList.contains('on')){e.preventDefault();initAudio();record();}});
+const setBt=t=>all('.js-bt').forEach(x=>x.textContent=t);
+function togglePower(){
+  power=!power;all('.js-pled').forEach(p=>p.classList.toggle('on',power));
+  if(power){ensureLive();setBt('연결 중…');setTimeout(()=>{if(power)setBt('연결됨');},900);toast('전원 켜짐 · 둘러보며 소리를 찾아보세요');}
+  else{stopLive();setBt('—');toast('전원 꺼짐');}
+  setMaster();renderCounter();
+}
+function renderCounter(){all('.js-counter').forEach(c=>{if(!power){c.textContent='--';c.classList.add('off');}else{c.textContent=String(state.shots.length).padStart(2,'0')+'/'+MAX;c.classList.remove('off');}});}
+function record(){
+  if(!scene)return;
+  if(!power){toast('빨간 버튼을 길게 눌러 전원을 켜세요');return;}
+  if(rec)return;
+  if(state.shots.length>=MAX){toast('28장을 다 채웠어요. 집에 돌아가 앱에서 현상하세요.');return;}
+  rec=true;all('.js-rled').forEach(r=>r.classList.add('on'));
+  const f=$('flash');f.style.transition='none';f.style.opacity=.8;requestAnimationFrame(()=>{f.style.transition='opacity .6s';f.style.opacity=0;});
+  const x=aim.x,y=aim.y,m=SRC.map(s=>+focusOf(s,x,y).toFixed(3));
+  const shot={sc:scene.id,x:Math.round(x),y:Math.round(y),m,v:+vol.toFixed(2),t:Date.now()};
+  setTimeout(()=>{state.shots.push(shot);save();rec=false;all('.js-rled').forEach(r=>r.classList.remove('on'));renderCounter();const n=state.shots.length;
+    toast(n===MAX?'필름이 다 찼어요 · 이제 집에서 현상할 수 있어요':`${n}번째 순간을 담았어요 · ${MAX-n}장 남음`,n===MAX?4000:2200);},3000);
+}
+all('.js-demo').forEach(b=>b.addEventListener('click',()=>{
+  if(state.developed){toast('앱에서 새 필름을 넣은 뒤 사용하세요');return;}
+  const now=Date.now();
+  while(state.shots.length<MAX){const S=SCENES[Math.floor(Math.random()*SCENES.length)],s=S.src[Math.floor(Math.random()*S.src.length)],r=S.r||185;
+    const x=s.x+(Math.random()-.5)*r*.7,y=s.y+(Math.random()-.5)*r*.4;
+    state.shots.push({sc:S.id,x:Math.round(x),y:Math.round(y),m:S.src.map(q=>+Math.exp(-Math.pow(Math.hypot(q.x-x,(q.y-y)*1.2)/r,2)).toFixed(3)),v:.7,t:now-(MAX-state.shots.length)*9*60000});}
+  save();renderCounter();toast('데모: 4곳의 소리로 28장이 채워졌어요 · 집 탭에서 현상해 보세요',3500);
+}));
+
+/* ---------- app ---------- */
+let developing=false;
+function domOf(s){const S=sceneOf(s.sc);if(!S)return null;let bi=0;s.m.forEach((v,i)=>{if(v>s.m[bi])bi=i;});return s.m[bi]>.4?S.src[bi]:null;}
+const nameOf=s=>{const d=domOf(s);return d?d.name:'주변 소리';};
+const hhmm=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
+function thumb(s,i){const S=sceneOf(s.sc),d=domOf(s);if(d&&d.ph&&d.ph.length)return `<img src="photos/${s.sc}/${d.ph[i%d.ph.length]}.jpg" alt="" loading="lazy">`;
+  const W=S.w,H=S.h,w=W*.18,h=w/1.5,x=Math.max(w/2,Math.min(W-w/2,s.x)),y=Math.max(h/2,Math.min(H-h/2,s.y)),x0=x-w/2,y0=y-h/2;
+  return `<div class="amb" style="background-image:url(scenes/${s.sc}-thumb.jpg);background-size:${W/w*100}% auto;background-position:${x0/(W-w)*100}% ${y0/(H-h)*100}%"></div>`;}
+function renderApp(){
+  const a=$('app'),n=state.shots.length;$('rollNo').textContent='ROLL '+String(state.roll).padStart(2,'0');
+  if(developing)return;
+  if(state.developed){
+    a.innerHTML=`<p style="font-size:12px;color:#8a8a96;margin:4px 2px 12px">${n}개의 순간 · ${hhmm(state.shots[0].t)} – ${hhmm(state.shots[n-1].t)}</p><div class="sheet">${state.shots.map((s,i)=>`<div class="frame"><div class="ph">${thumb(s,i)}<span class="no mono">${String(i+1).padStart(2,'0')}</span></div><div class="meta"><div>${nameOf(s)}<small class="pl">${(sceneOf(s.sc)||{}).name||''}</small><small class="mono">${hhmm(s.t)}</small></div><button class="play" data-i="${i}">▶</button></div></div>`).join('')}</div><button class="cta sub" id="newRoll">새 필름 넣기</button>`;
+    a.querySelectorAll('.play').forEach(b=>b.addEventListener('click',()=>playShot(+b.dataset.i,b)));
+    $('newRoll').addEventListener('click',()=>{state={roll:state.roll+1,shots:[],developed:false};save();renderApp();renderCounter();toast('새 필름을 넣었어요 · 다시 밖으로 나가볼까요?');});
+    return;
+  }
+  const full=n>=MAX;
+  a.innerHTML=`<div class="big"><div class="n">${n}<small> / ${MAX}</small></div><p>${full?'필름이 다 찼어요.<br>이제 그날의 소리를 현상할 수 있어요.':`28장을 모두 채워야 현상할 수 있어요.<br>아직 <b>${MAX-n}장</b> 남았어요.`}</p></div><div class="slots">${Array.from({length:MAX},(_,i)=>`<div class="slot ${i<n?'f':''}"></div>`).join('')}</div><button class="cta" id="dev" ${full?'':'disabled'}>${full?'현상하기':'아직 현상할 수 없어요'}</button>`;
+  if(full)$('dev').addEventListener('click',develop);
+}
+function develop(){developing=true;$('app').innerHTML=`<div class="big"><div class="n" style="font-size:34px">현상 중…</div><p>28개의 소리와 장면을 꺼내고 있어요.</p></div><div class="prog"><i id="pg"></i></div>`;
+  let p=0;const iv=setInterval(()=>{p+=2.5;$('pg').style.width=p+'%';if(p>=100){clearInterval(iv);developing=false;state.developed=true;save();renderApp();}},70);}
+let playing=null;
+function playShot(i,b){
+  if(!initAudio()){toast('이 브라우저에서는 소리를 재생할 수 없어요');return;}
+  if(playing)playing();all('.play.on').forEach(x=>{x.classList.remove('on');x.textContent='▶';});
+  const s=state.shots[i],S=sceneOf(s.sc);b.textContent='…';
+  loadSounds(s.sc).then(bufs=>{const out=ctx.createGain(),t=ctx.currentTime,list=[];
+    out.gain.setValueAtTime(0,t);out.gain.linearRampToValueAtTime(.9,t+.3);out.gain.setValueAtTime(.9,t+2.7);out.gain.linearRampToValueAtTime(0,t+3);out.connect(ctx.destination);
+    S.src.forEach((q,k)=>{if(!bufs[q.id])return;const c=chain(bufs[q.id],out,false);c.g.gain.value=gainFor(q.lv,s.m[k],Math.max(.4,s.v));c.src.start(t,Math.random()*2);c.src.stop(t+3.1);list.push(c.src);});
+    b.classList.add('on');b.textContent='■';playing=()=>{list.forEach(x=>{try{x.stop();}catch(e){}});};
+    setTimeout(()=>{b.classList.remove('on');b.textContent='▶';},3000);});
+}
+
+/* ---------- modes ---------- */
+function setMode(m){mode=m;document.body.classList.toggle('home',m==='home');$('mField').classList.toggle('on',m==='field');$('mHome').classList.toggle('on',m==='home');$('vField').classList.toggle('on',m==='field');$('vHome').classList.toggle('on',m==='home');setMaster();if(m==='home')renderApp();else layout();}
+$('mField').addEventListener('click',()=>setMode('field'));$('mHome').addEventListener('click',()=>setMode('home'));
+let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms);}
+(function(){const cv=document.getElementById('ctr2d');if(!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height,SW=7.9,SH=4.3,SX=35.0,SY=83.3;
+  const px=mm=>mm/SW*W,X=xm=>W/2+px(SX-xm)*1.02,Y=ym=>H/2+px(SY-ym)*1.0;let last='';
+  function draw(){const P=power,N=state.shots.length,k=P+'|'+N;if(k!==last){last=k;
+    g.fillStyle='#262628';g.fillRect(0,0,W,H);
+    const nums=[N+1,N,N-1],xs=[31.6,35.0,38.3],ys=[83.55,83.05,82.5];
+    g.fillStyle=P?'#f2f2f2':'rgba(242,242,242,.13)';g.shadowColor='rgba(255,255,255,.45)';g.shadowBlur=P?14:0;
+    g.font=`500 ${Math.round(px(1.75))}px Jost, Futura, "Avenir Next", "Century Gothic", Arial, sans-serif`;g.textAlign='center';g.textBaseline='middle';
+    nums.forEach((n,i)=>{if(n<0||n>28)return;g.save();g.translate(X(xs[i]),Y(ys[i]));g.rotate(Math.PI/2);g.fillText(String(n).padStart(2,'0'),0,0);g.restore();});
+    [33.1,36.8].forEach(xm=>{g.beginPath();g.arc(X(xm),Y(83.0),px(.2),0,Math.PI*2);g.fill();});}
+    document.getElementById('recglow').classList.toggle('on',!!rec);requestAnimationFrame(draw);}
+  (document.fonts?document.fonts.load('500 100px Jost'):Promise.resolve()).finally(()=>{last='';});draw();})();
+window.simPower=()=>power;window.simCount=()=>state.shots.length;window.simRec=()=>rec;window.simVol=()=>vol;
+document.body.classList.add('la');
+all('#lay button').forEach(b=>b.addEventListener('click',()=>{all('#lay button').forEach(x=>x.classList.toggle('on',x===b));document.body.classList.remove('la','lb');document.body.classList.add(b.dataset.l);layout();setVol(vol);}));
+goScene(SCENES[Math.floor(Math.random()*SCENES.length)].id);
+layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);
+
+</script>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<script src="pinch-model.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+const boxA = document.getElementById('held3d'), boxB = document.getElementById('b3d'), btnA = document.getElementById('hbtn3d'), btnB = document.getElementById('hbtnB'), hcap = document.getElementById('hcap3d');
+let box3d = boxA, hbtn = btnA;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setClearColor(0x000000, 0);
+renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = .8;
+box3d.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const pm = new THREE.PMREMGenerator(renderer);
+function studioEnv() {
+  const env = new THREE.Scene(); env.background = new THREE.Color(0xcdcdd0);
+  const box = (w, h, x, y, z, i) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(i, i, i), side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 0, 0); env.add(m); };
+  box(4, 3, 0, 5, 1, 3.2); box(1.2, 5, -4, 1, 2, 2.4); box(.6, 5, 4, 1, -1.5, 3.0); box(.6, 5, -2.5, 1, -4, 2.0); box(6, 2, 0, -3, 3, 1.1); box(5, 4, 0, 1, 5, .9); box(5, 4, 0, 1, -5, 1.4);
+  return pm.fromScene(env, .02).texture;
+}
+scene.environment = studioEnv();
+const camera = new THREE.PerspectiveCamera(24, 1, .005, 5);
+let model, parts = {}, tickPivot, btnHome = new THREE.Vector3(), count = 0;
+let power = false; // shadowed locally; synced from the simulation each frame
+const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+const bin = Uint8Array.from(atob(window.PINCH_GLB), c => c.charCodeAt(0)).buffer;
+loader.parse(bin, '', g => {
+  model = g.scene;
+  model.traverse(o => {
+    if (o.isMesh) {
+      const m = o.material, pn = o.parent ? o.parent.name : '';
+      if (m.transmission > 0 && pn !== 'mat_glass') { m.color.setStyle('#ebebef'); m.roughness = .36; m.ior = 1.48; m.thickness = .0055; m.transmission = .76; m.attenuationColor = new THREE.Color().setStyle('#dedee2'); m.attenuationDistance = .045; m.specularIntensity = .7; m.clearcoat = .35; m.clearcoatRoughness = .2; }
+      if (['mat_frame', 'mat_dish'].includes(pn)) m.roughness = .42;
+      if (pn === 'mat_dish') m.color.setStyle('#b7b6cc');
+      if (pn === 'mat_frame') { m.color.setStyle('#c6c6ca'); m.emissive = m.color.clone().multiplyScalar(.1); }
+      if (pn === 'mat_print_front') m.color.setStyle('#ffffff');
+      if (['button', 'tick', 'mic'].includes(pn)) m.roughness = .36;
+      if (pn === 'mat_glass') { m.transmission = 1; m.roughness = .03; m.thickness = .0005; m.ior = 1.5; }
+    }
+    if (o.name) parts[o.name] = o;
+  });
+  scene.add(model);
+  const db = new THREE.Box3().setFromObject(parts.mat_dish), dc = db.getCenter(new THREE.Vector3());
+  tickPivot = new THREE.Group(); tickPivot.position.set(dc.x, dc.y, 0); model.add(tickPivot); tickPivot.attach(parts.tick);
+  btnHome.copy(parts.button.position);
+  ['rec_led', 'led'].forEach(n => parts[n] && parts[n].traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.emissive = new THREE.Color(0, 0, 0); } }));
+  buildCounter();
+  // first-person hold: we look at the back, slightly from above-right
+  const bb = new THREE.Box3().setFromObject(model), c = bb.getCenter(new THREE.Vector3());
+  aimAt = c.clone().add(new THREE.Vector3(0, .008, 0));
+  resize();
+}, e => console.error(e));
+let aimAt = new THREE.Vector3();
+// ---------- live counter on the back screen (original layout: 3 rotated pairs) ----------
+// screen window 7.9 x 4.3 mm, centre at model (35.0, 83.3); pairs at x 31.6 / 35.0 / 38.3, dots at 33.1 / 36.8 (mm, model space)
+let ctrCanvas, ctrTex, ctrMesh;
+const SW = 7.9, SH = 4.3, SX = 35.0, SY = 83.3;
+function buildCounter() {
+  const d = parts.digits; if (!d) return;
+  const bb = new THREE.Box3().setFromObject(d), c = bb.getCenter(new THREE.Vector3());
+  // digits bbox centre in model mm is ~ (35.0, 83.0): offset so the plane sits on the screen window centre
+  d.visible = false;
+  ctrCanvas = document.createElement('canvas'); ctrCanvas.width = 1264; ctrCanvas.height = Math.round(1264 * SH / SW);
+  ctrTex = new THREE.CanvasTexture(ctrCanvas); ctrTex.colorSpace = THREE.SRGBColorSpace; ctrTex.anisotropy = 8;
+  ctrMesh = new THREE.Mesh(new THREE.PlaneGeometry(SW / 1000, SH / 1000), new THREE.MeshBasicMaterial({ map: ctrTex, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+  ctrMesh.position.set(c.x, c.y + (SY - 83.0) / 1000, bb.min.z - .00005); ctrMesh.rotation.y = Math.PI;
+  model.add(ctrMesh);
+  (document.fonts ? document.fonts.load('500 200px Jost') : Promise.resolve()).finally(drawCounter); drawCounter();
+}
+function drawCounter() {
+  if (!ctrCanvas) return;
+  const g = ctrCanvas.getContext('2d'), W = ctrCanvas.width, H = ctrCanvas.height;
+  const px = mm => mm / SW * W;                       // mm -> px
+  const X = xm => W / 2 + px(SX - xm);                // model x grows to the left when seen from the back
+  const Y = ym => H / 2 + px(SY - ym);
+  g.fillStyle = '#1b1b1d'; g.fillRect(0, 0, W, H);
+  // film-counter dial: current shot in the centre, previous on one side, next on the other (as in the original 23·25·27)
+  const nums = [count + 1, count, count - 1];
+  const groups = nums.map(n => (n >= 0 && n <= 28) ? String(n).padStart(2, '0') : '');
+  const xs = [31.6, 35.0, 38.3];
+  g.fillStyle = power ? '#f2f2f2' : 'rgba(242,242,242,.13)';
+  g.shadowColor = 'rgba(255,255,255,.45)'; g.shadowBlur = power ? 14 : 0;
+  g.font = `500 ${Math.round(px(1.8))}px Jost, Futura, "Avenir Next", "Century Gothic", "Helvetica Neue", Arial, sans-serif`;
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  const ys = [83.55, 83.05, 82.5];   // original pairs are staggered: right high, left low
+  groups.forEach((t, k) => { g.save(); g.translate(X(xs[k]), Y(ys[k])); g.rotate(Math.PI / 2); g.fillText(t, 0, 0); g.restore(); });
+  [33.1, 36.8].forEach(xm => { g.beginPath(); g.arc(X(xm), Y(83.0), px(.2), 0, Math.PI * 2); g.fill(); });
+  ctrTex.needsUpdate = true;
+}
+
+function ptMaterials() {}
+const DIAL_CCW = 1.78, DIAL_CW = -1.13;
+let lastKey = '';
+function resize() {
+  const w = box3d.clientWidth, h = box3d.clientHeight; if (!w) return;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); const ro = new ResizeObserver(resize); ro.observe(boxA); ro.observe(boxB);
+const v = new THREE.Vector3();
+renderer.setAnimationLoop(t => {
+  if (!model) return;
+  const isB = document.body.classList.contains('lb');
+  if (!isB) return;
+  const want = boxB; if (renderer.domElement.parentNode !== want) { want.appendChild(renderer.domElement); box3d = want; hbtn = btnB; resize(); }
+  if (!box3d.clientWidth) return;
+  // sync with the simulation's global state (classic-script globals)
+  const P = window.simPower(), N = window.simCount(), R = window.simRec(), V = window.simVol();
+  power = P; count = N;
+  const key = P + '|' + N; if (key !== lastKey) { lastKey = key; drawCounter(); }
+  tickPivot.rotation.z = DIAL_CCW - V * (DIAL_CCW - DIAL_CW);
+  const recOn = R && Math.floor(t / 250) % 2 === 0;
+  parts.rec_led && parts.rec_led.traverse(o => { if (o.isMesh) { o.material.emissive.set(recOn ? 0xff2020 : 0); o.material.emissiveIntensity = recOn ? 2.4 : 0; } });
+  parts.led && parts.led.traverse(o => { if (o.isMesh) { o.material.emissive.set(P ? 0xffffff : 0); o.material.emissiveIntensity = P ? 2 : 0; } });
+  parts.button.position.copy(btnHome); if (hbtn.classList.contains('press')) parts.button.position.x -= .0012;
+  // camera: behind the device, a little above and to the right, gentle hand sway
+  const sw = Math.sin(t / 1400) * .004, sh = Math.cos(t / 1700) * .003;
+  if (isB) camera.position.set(aimAt.x + .12 + sw * .5, aimAt.y + .045, aimAt.z + .3);   // front 3/4 view in the panel
+  else camera.position.set(aimAt.x - .1 + sw, aimAt.y + .07 + sh, aimAt.z - .32);        // first-person back view
+  camera.lookAt(aimAt);
+  renderer.render(scene, camera);
+  // place the invisible hit area over the 3D button
+  const bb = new THREE.Box3().setFromObject(parts.button), c = bb.getCenter(v).project(camera);
+  const w = box3d.clientWidth, h = box3d.clientHeight, x = (c.x + 1) / 2 * w, y = (1 - c.y) / 2 * h;
+  if (isB) { hbtn.style.left = (x - 16) + 'px'; hbtn.style.top = (y - 34) + 'px'; hbtn.style.width = '32px'; hbtn.style.height = '68px'; }
+});
+</script>
+</body>
+</html>
