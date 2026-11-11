@@ -496,7 +496,7 @@ function goScene(id){
       requestAnimationFrame(()=>requestAnimationFrame(()=>{snap.style.opacity='0';}));setTimeout(()=>snap.remove(),XF*1000+120);}
     clearFocus();scene=s;SRC=s.src;PW=s.w;PH=s.h;R0=s.r||185;
     $('panoImg').src=img.src;$('panoImg').width=PW;$('panoImg').height=PH;$('blurImg').src=`scenes/${id}-thumb.jpg`;
-    $('placeName').textContent=s.name;loadLum(id);layout();cam.x=s.start?s.start[0]:PW/2;cam.y=s.start?s.start[1]:PH*.55;clampCam();
+    $('placeName').textContent=s.name;checkLogo();layout();cam.x=s.start?s.start[0]:PW/2;cam.y=s.start?s.start[1]:PH*.55;clampCam();
     $('loading').classList.remove('on');ensureLive();if(ctx)loadSounds(id);
     if(mode!=='field')setMode('field');toast(`${s.name}에 도착했어요`);
   };
@@ -510,13 +510,8 @@ $('placeBtn').addEventListener('click',e=>{e.stopPropagation();const on=!$('pmen
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('.placewrap'))closeMenu();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
 /* logo colour by background */
-const lumC=document.createElement('canvas'),lumX=lumC.getContext('2d',{willReadFrequently:true});let lumOK=false;
-function loadLum(id){lumOK=false;const im=new Image();im.onload=()=>{lumC.width=im.naturalWidth;lumC.height=im.naturalHeight;lumX.drawImage(im,0,0);lumOK=true;checkLogo();};im.src=`scenes/${id}-thumb.jpg`;}
-function checkLogo(){const br=$('brand');if(mode!=='field'||!lumOK||!sc){br.classList.remove('light');return;}
-  const r=br.getBoundingClientRect(),k=lumC.width/PW,toX=x=>(cam.x+(x-sw/2)/sc)*k,toY=y=>(cam.y+(y-sh/2)/sc)*k;
-  const x0=Math.max(0,Math.floor(toX(r.left))),y0=Math.max(0,Math.floor(toY(r.top))),w=Math.max(1,Math.ceil(toX(r.right))-x0),h=Math.max(1,Math.ceil(toY(r.bottom))-y0);
-  let d;try{d=lumX.getImageData(x0,y0,w,h).data;}catch(_){return;}let L=0;for(let i=0;i<d.length;i+=4)L+=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];L/=d.length/4;
-  br.classList.toggle('light',L<140);}
+const LOGO_LIGHT={camp:true,beach:false,park:false,summit:false};
+function checkLogo(){const br=$('brand');br.classList.toggle('light',mode==='field'&&!!scene&&!!LOGO_LIGHT[scene.id]);}
 setInterval(checkLogo,250);
 $('pkClose').addEventListener('click',()=>{if(scene)$('picker').classList.remove('on');});
 
