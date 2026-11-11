@@ -234,7 +234,7 @@ body.home .fillbtn{background:#e6e6ec}
     <div class="vig"></div>
     <div class="reticle" id="ret"><div class="wave" id="wave"></div><div class="ring"></div><div class="dot"></div><div class="lbl" id="lbl"></div></div>
     <div class="flash" id="flash"></div>
-    <div class="tip" id="tip">마우스로 장면 속 작은 소리를 찾아 겨눠 보세요 · 빨간 버튼을 길게 눌러 전원을 켜세요</div>
+    <div class="tip" id="tip">화면을 한 번 클릭해 소리를 켜고, 장면 속 작은 소리를 겨눠 보세요 · 빨간 버튼을 누르면 바로 채집돼요</div>
     <div class="edge l" id="edgeL"></div><div class="edge r" id="edgeR"></div><div class="edge t" id="edgeT"></div><div class="edge b" id="edgeB"></div>
     <!-- 시안 A -->
     <div class="held" id="held">
@@ -244,7 +244,7 @@ body.home .fillbtn{background:#e6e6ec}
       <canvas class="ctr2d" id="ctr2d" width="1264" height="804"></canvas>
       <div class="recglow" id="recglow"></div>
       <button class="hbtn js-btn" id="hbtn3d" aria-label="전원/채집 버튼"></button>
-      <div class="hcap" id="hcap3d">길게: 전원 · 짧게: 채집</div>
+      <div class="hcap" id="hcap3d">눌러서 채집</div>
     </div>
 
   </div>
@@ -280,10 +280,10 @@ body.home .fillbtn{background:#e6e6ec}
 
 <script>
 const MAX=28;
-const SCENES=[{"id": "beach", "name": "제주 바닷가", "desc": "현무암에 부서지는 파도, 몽돌, 갈매기, 포구의 어선", "w": 2560, "h": 1072, "r": 120, "start": [1280, 590], "src": [{"id": "breakwater", "name": "방파제 파도", "x": 672, "y": 528, "lv": 0.8, "ph": ["breakwater"]}, {"id": "shore", "name": "현무암 사이 파도", "x": 432, "y": 720, "lv": 0.6, "ph": ["shore"]}, {"id": "pebbles", "name": "몽돌 구르는 소리", "x": 640, "y": 976, "lv": 0.9, "ph": ["pebbles"]}, {"id": "gulls", "name": "갈매기", "x": 795, "y": 160, "lv": 0.9, "ph": ["gulls"]}, {"id": "boat", "name": "어선 엔진", "x": 1744, "y": 552, "lv": 0.9, "ph": ["boat"]}, {"id": "grass", "name": "바닷바람에 흔들리는 풀", "x": 2240, "y": 960, "lv": 0.7, "ph": ["grass"]}]}, {"id": "park", "name": "도시 숲 공원", "desc": "이른 아침의 분수, 까치, 비둘기, 스프링클러, 도시의 소리", "w": 2560, "h": 1072, "r": 120, "start": [1280, 590], "src": [{"id": "magpie", "name": "까치", "x": 248, "y": 720, "lv": 0.9, "ph": ["magpie"]}, {"id": "bike", "name": "공공자전거", "x": 720, "y": 672, "lv": 0.8, "ph": ["bike"]}, {"id": "pigeons", "name": "비둘기", "x": 800, "y": 816, "lv": 0.9, "ph": ["pigeons"]}, {"id": "sprinkler", "name": "스프링클러", "x": 1584, "y": 640, "lv": 0.8, "ph": ["sprinkler"]}, {"id": "sparrows", "name": "덤불 속 참새", "x": 1728, "y": 728, "lv": 0.9, "ph": ["sparrows"]}, {"id": "fountain", "name": "분수", "x": 2368, "y": 832, "lv": 0.7, "ph": ["fountain"]}, {"id": "traffic", "name": "멀리 차 소리", "x": 2240, "y": 648, "lv": 0.55, "ph": ["traffic"]}, {"id": "trees", "name": "나뭇잎 소리", "x": 2160, "y": 240, "lv": 0.7, "ph": ["trees"]}]}, {"id": "summit", "name": "설악 능선 정상", "desc": "구름바다 위 바람, 소나무, 까마귀, 매, 먼 폭포", "w": 2560, "h": 1072, "r": 120, "start": [1280, 590], "src": [{"id": "pine", "name": "바람 맞는 소나무", "x": 320, "y": 528, "lv": 0.8, "ph": ["pine"]}, {"id": "crow", "name": "큰부리까마귀", "x": 688, "y": 480, "lv": 0.9, "ph": ["crow"]}, {"id": "hawk", "name": "매", "x": 1104, "y": 216, "lv": 0.9, "ph": ["hawk"]}, {"id": "wind", "name": "구름 위 바람", "x": 1920, "y": 416, "lv": 0.75, "ph": ["wind"]}, {"id": "falls", "name": "먼 폭포", "x": 2032, "y": 672, "lv": 0.5, "ph": ["falls"]}, {"id": "insects", "name": "풀벌레", "x": 2464, "y": 896, "lv": 0.5, "ph": ["insects"]}]}, {"id": "camp", "name": "강원 계곡 캠핑장", "desc": "계곡물, 개구리, 화로대 불, 주전자, 매미, 딱따구리", "w": 2560, "h": 1072, "r": 120, "start": [1280, 590], "src": [{"id": "stream", "name": "계곡 물소리", "x": 560, "y": 840, "lv": 0.7, "ph": ["stream"]}, {"id": "frog", "name": "개구리", "x": 1064, "y": 888, "lv": 0.9, "ph": ["frog"]}, {"id": "cicada", "name": "매미", "x": 976, "y": 480, "lv": 0.6, "ph": ["cicada"]}, {"id": "birds", "name": "새소리", "x": 1096, "y": 70, "lv": 0.9, "ph": ["birds"]}, {"id": "woodpecker", "name": "숨은 딱따구리", "x": 1536, "y": 400, "lv": 1, "ph": ["woodpecker"]}, {"id": "fire", "name": "화로대 불", "x": 1816, "y": 712, "lv": 0.9, "ph": ["fire"]}, {"id": "kettle", "name": "끓는 주전자", "x": 1944, "y": 680, "lv": 0.8, "ph": ["kettle"]}, {"id": "leaves", "name": "나뭇잎 소리", "x": 2240, "y": 192, "lv": 0.65, "ph": ["leaves"]}]}];
+const SCENES=[{"id": "beach", "name": "제주 바닷가", "desc": "현무암에 부서지는 파도, 몽돌, 갈매기, 포구의 어선", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "breakwater", "name": "방파제 파도", "x": 1008, "y": 792, "lv": 0.8, "ph": ["breakwater"]}, {"id": "shore", "name": "현무암 사이 파도", "x": 648, "y": 1080, "lv": 0.6, "ph": ["shore"]}, {"id": "pebbles", "name": "몽돌 구르는 소리", "x": 960, "y": 1464, "lv": 0.9, "ph": ["pebbles"]}, {"id": "gulls", "name": "갈매기", "x": 1192, "y": 240, "lv": 0.9, "ph": ["gulls"]}, {"id": "boat", "name": "어선 엔진", "x": 2616, "y": 828, "lv": 0.9, "ph": ["boat"]}, {"id": "grass", "name": "바닷바람에 흔들리는 풀", "x": 3360, "y": 1440, "lv": 0.7, "ph": ["grass"]}]}, {"id": "park", "name": "도시 숲 공원", "desc": "이른 아침의 분수, 까치, 비둘기, 스프링클러, 도시의 소리", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "magpie", "name": "까치", "x": 372, "y": 1080, "lv": 0.9, "ph": ["magpie"]}, {"id": "bike", "name": "공공자전거", "x": 1080, "y": 1008, "lv": 0.8, "ph": ["bike"]}, {"id": "pigeons", "name": "비둘기", "x": 1200, "y": 1224, "lv": 0.9, "ph": ["pigeons"]}, {"id": "sprinkler", "name": "스프링클러", "x": 2376, "y": 960, "lv": 0.8, "ph": ["sprinkler"]}, {"id": "sparrows", "name": "덤불 속 참새", "x": 2592, "y": 1092, "lv": 0.9, "ph": ["sparrows"]}, {"id": "fountain", "name": "분수", "x": 3552, "y": 1248, "lv": 0.7, "ph": ["fountain"]}, {"id": "traffic", "name": "멀리 차 소리", "x": 2760, "y": 930, "lv": 0.55, "ph": ["traffic"]}, {"id": "trees", "name": "나뭇잎 소리", "x": 3240, "y": 360, "lv": 0.7, "ph": ["trees"]}]}, {"id": "summit", "name": "설악 능선 정상", "desc": "구름바다 위 바람, 소나무, 까마귀, 매, 먼 폭포", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "pine", "name": "바람 맞는 소나무", "x": 480, "y": 792, "lv": 0.8, "ph": ["pine"]}, {"id": "crow", "name": "큰부리까마귀", "x": 1032, "y": 720, "lv": 0.9, "ph": ["crow"]}, {"id": "hawk", "name": "매", "x": 1656, "y": 324, "lv": 0.9, "ph": ["hawk"]}, {"id": "wind", "name": "구름 위 바람", "x": 2880, "y": 624, "lv": 0.75, "ph": ["wind"]}, {"id": "falls", "name": "먼 폭포", "x": 3048, "y": 1008, "lv": 0.5, "ph": ["falls"]}, {"id": "insects", "name": "풀벌레", "x": 3696, "y": 1344, "lv": 0.5, "ph": ["insects"]}]}, {"id": "camp", "name": "강원 계곡 캠핑장", "desc": "계곡물, 개구리, 화로대 불, 주전자, 매미, 딱따구리", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "stream", "name": "계곡 물소리", "x": 840, "y": 1260, "lv": 0.7, "ph": ["stream"]}, {"id": "frog", "name": "개구리", "x": 1596, "y": 1332, "lv": 0.9, "ph": ["frog"]}, {"id": "cicada", "name": "매미", "x": 1464, "y": 720, "lv": 0.6, "ph": ["cicada"]}, {"id": "birds", "name": "새소리", "x": 1644, "y": 105, "lv": 0.9, "ph": ["birds"]}, {"id": "woodpecker", "name": "숨은 딱따구리", "x": 2304, "y": 600, "lv": 1, "ph": ["woodpecker"]}, {"id": "fire", "name": "화로대 불", "x": 2724, "y": 1068, "lv": 0.9, "ph": ["fire"]}, {"id": "kettle", "name": "끓는 주전자", "x": 2916, "y": 1020, "lv": 0.8, "ph": ["kettle"]}, {"id": "leaves", "name": "나뭇잎 소리", "x": 3360, "y": 288, "lv": 0.65, "ph": ["leaves"]}]}];
 const $=id=>document.getElementById(id),all=c=>document.querySelectorAll(c);
 let scene=null,SRC=[],PW=3840,PH=1536,R0=185;
-let power=false,vol=.7,rec=false,mode='field';
+let power=true,vol=.7,rec=false,mode='field';   // always on: no power step
 let state={roll:1,shots:[],developed:false};
 try{const s=JSON.parse(localStorage.getItem('pinch-v4'));if(s&&Array.isArray(s.shots))state=s;}catch(e){}
 function save(){try{localStorage.setItem('pinch-v4',JSON.stringify(state))}catch(e){}}
@@ -314,11 +314,11 @@ const aimPt=()=>({x:cam.x+(ptr.x-sw/2)/sc,y:cam.y+(ptr.y-sh/2)/sc});
 /* ---------- audio ---------- */
 let ctx=null,master=null,live={},bufCache={},liveScene=null;
 function initAudio(){
-  if(ctx){if(ctx.state==='suspended')ctx.resume().catch(()=>{});return true;}
+  if(ctx){if(ctx.state==='suspended')ctx.resume().catch(()=>{});setMaster();ensureLive();return true;}
   try{ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return false;}
   master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
   if(scene)loadSounds(scene.id);
-  return true;
+  setMaster();ensureLive();return true;
 }
 const rawCache={};
 function fetchRaw(sid,id){const k=sid+'/'+id;if(!rawCache[k])rawCache[k]=fetch(`sounds/${sid}/${id}.mp3`).then(r=>r.arrayBuffer()).catch(()=>null);return rawCache[k];}
@@ -396,7 +396,7 @@ all('.js-dish').forEach(d=>{let dy=null;
   d.addEventListener('pointermove',e=>{if(dy===null)return;setVol(vol+(dy-e.clientY)/150);dy=e.clientY;});
   d.addEventListener('pointerup',()=>dy=null);});
 all('.js-btn').forEach(btn=>{let pressT=null,longDone=false;
-  btn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();initAudio();longDone=false;btn.classList.add('press');pressT=setTimeout(()=>{longDone=true;togglePower();},700);});
+  btn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();initAudio();longDone=false;btn.classList.add('press');pressT=setTimeout(()=>{},700);});
   btn.addEventListener('pointerup',()=>{btn.classList.remove('press');if(pressT){clearTimeout(pressT);pressT=null;if(!longDone)record();}});
   btn.addEventListener('pointerleave',()=>{btn.classList.remove('press');if(pressT){clearTimeout(pressT);pressT=null;}});
   btn.addEventListener('contextmenu',e=>e.preventDefault());});
@@ -488,6 +488,7 @@ let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classL
   hd.addEventListener('pointermove',e=>{if(!drag)return;let d=ang(e)-drag.a;if(d>180)d-=360;if(d<-180)d+=360;setVol(drag.v+d/(AMAX-AMIN));});
   const end=()=>{drag=null;hd.classList.remove('drag');};hd.addEventListener('pointerup',end);hd.addEventListener('pointercancel',end);
   hd.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();setVol(vol-e.deltaY/1200);},{passive:false});})();
+['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>initAudio(),{once:false,passive:true}));
 window.simPower=()=>power;window.simCount=()=>state.shots.length;window.simRec=()=>rec;window.simVol=()=>vol;
 document.body.classList.add('la');
 
