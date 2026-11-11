@@ -402,7 +402,7 @@ stage.addEventListener('pointermove',e=>{setPtr(e);if(!moved){moved=true;setTime
 addEventListener('pointermove',e=>{if(mode==='field'&&!stage.contains(e.target))setPtr(e);});
 document.addEventListener('mouseout',e=>{if(!e.relatedTarget)ptr.in=false;});
 stage.addEventListener('pointerdown',e=>{initAudio();if(e.pointerType!=='mouse')setPtr(e);
-  if(e.button===0&&scene&&!e.target.closest('.hbtn,.hdial,.held')&&!ptr.ui)setFocus();});
+  if(e.button===0&&scene&&!e.target.closest('.hbtn,.hdial,.held')&&!ptr.ui){if(focus){const fx=sw/2+(focus.x-cam.x)*sc,fy=sh/2+(focus.y-cam.y)*sc;if(Math.hypot(ptr.x-fx,ptr.y-fy)<FR){clearFocus();return;}}setFocus();}});
 addEventListener('keydown',e=>{if(e.key==='Escape')clearFocus();});
 addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS'].includes(e.code)){keys[e.code]=1;e.preventDefault();}});
 addEventListener('keyup',e=>{delete keys[e.code];});
@@ -454,7 +454,7 @@ function frame(now){
   if(false){const zx=sw*.14,zy=sh*.12;
     if(ptr.x<zx)vx=-Math.pow(1-ptr.x/zx,1.5);else if(ptr.x>sw-zx)vx=Math.pow(1-(sw-ptr.x)/zx,1.5);
     if(ptr.y<zy)vy=-Math.pow(1-ptr.y/zy,1.5);else if(ptr.y>sh-zy)vy=Math.pow(1-(sh-ptr.y)/zy,1.5);}
-  if(ptr.in&&ptr.tx!=null){const tg=camTarget(),k=1-Math.pow(.0005,dt);cam.x+=(tg.x-cam.x)*k;cam.y+=(tg.y-cam.y)*k;}clampCam();
+  if(ptr.in&&ptr.tx!=null&&!focus){const tg=camTarget(),k=1-Math.pow(.0005,dt);cam.x+=(tg.x-cam.x)*k;cam.y+=(tg.y-cam.y)*k;}clampCam();
   $('edgeL').style.opacity=vx<0?Math.min(1,-vx*2):0;$('edgeR').style.opacity=vx>0?Math.min(1,vx*2):0;
   $('edgeT').style.opacity=vy<0?Math.min(1,-vy*2):0;$('edgeB').style.opacity=vy>0?Math.min(1,vy*2):0;
   pano.style.transform=`translate(${sw/2-cam.x*sc}px,${sh/2-cam.y*sc}px) scale(${sc})`;
