@@ -219,13 +219,44 @@ body.home .fillbtn{background:#e6e6ec}
 .held .hdial{position:absolute;left:37.86%;top:5.3%;width:58.43%;height:32.12%;border-radius:50%;pointer-events:auto;cursor:grab;touch-action:none}
 .held .hdial:hover{box-shadow:0 0 0 2px rgba(255,255,255,.55)}
 .held .hdial.drag{cursor:grabbing}
+
+/* ---- Figma UI 282:161 ---- */
+header{padding:40px 60px 0 !important;align-items:flex-start !important}
+.brand{background:none !important;padding:0 !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;height:36px}
+.brand img{height:36px !important;width:auto;transition:filter .35s}
+.brand.light img{filter:brightness(0) invert(1)}
+.right{gap:16px}
+.gp{font-family:"Helvetica Neue",Helvetica,"Apple SD Gothic Neo","Pretendard",sans-serif;font-weight:500;font-size:17px;line-height:1;color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(9px) saturate(1.3);-webkit-backdrop-filter:blur(9px) saturate(1.3);border-radius:50px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 12px rgba(0,0,0,.12);text-shadow:0 1px 6px rgba(0,0,0,.35)}
+.modes.gp button.on,.pmenu button.cur{text-shadow:none}
+button.gp{height:54px;padding:0 20px;margin:0 !important;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap}
+button.gp:hover{background:rgba(255,255,255,.2)}
+.gp .ic{width:24px;height:24px;flex:none}
+.modes.gp{display:flex;gap:6px;padding:7px;height:54px;box-sizing:border-box}
+.modes.gp button{border:0;background:transparent;color:#fff;font:inherit;padding:8px 16px;border-radius:90px;cursor:pointer;box-shadow:none}
+.modes.gp button.on{background:#fff;color:#222}
+body.home .gp{background:rgba(34,34,40,.72);border-color:rgba(255,255,255,.12)}
+body.home button.gp:hover{background:rgba(34,34,40,.85)}
+body.home .fillbtn{background:rgba(34,34,40,.72)}
+.placewrap{position:relative}
+.pmenu{position:absolute;top:calc(100% + 8px);left:0;min-width:100%;padding:6px;border-radius:20px;background:rgba(28,28,34,.72);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;flex-direction:column;gap:2px;z-index:30}
+.pmenu.on{display:flex}
+.pmenu button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;color:#fff;font:500 15px "Helvetica Neue",Helvetica,"Apple SD Gothic Neo",sans-serif;white-space:nowrap}
+.pmenu button img{width:44px;height:28px;object-fit:cover;border-radius:6px;flex:none}
+.pmenu button:hover,.pmenu button:focus-visible{background:rgba(255,255,255,.12)}
+.pmenu button.cur{background:rgba(255,255,255,.92);color:#222}
+@media (max-width:900px){header{padding:20px 20px 0 !important}.gp{font-size:14px}button.gp,.modes.gp{height:44px}.modes.gp button{padding:6px 12px}.right{gap:8px}.brand img{height:28px !important}}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand"><img src="logo.svg" alt="Pinch"><small>Sound Collection Device · 사용 시뮬레이션</small></div>
-  <div class="right"><button class="fillbtn js-demo" id="fillBtn">남은 장 채우기</button><button class="place" id="placeBtn">장소 · <b id="placeName">고르기</b> ▾</button><div class="modes"><button id="mField" class="on">현장</button><button id="mHome">집 · Pinch 앱</button></div></div>
+  <div class="brand" id="brand"><img src="logo.svg" alt="Pinch"></div>
+  <div class="right">
+    <button class="gp fillbtn" id="fillBtn">한 롤 채우기</button>
+    <div class="placewrap"><button class="gp place" id="placeBtn" aria-haspopup="listbox" aria-expanded="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span id="placeName">장소</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg></button>
+      <div class="pmenu" id="pmenu" role="listbox"></div></div>
+    <div class="gp modes"><button id="mField" class="on">현장</button><button id="mHome">어플</button></div>
+  </div>
 </header>
 
 <section class="view on" id="vField">
@@ -280,7 +311,7 @@ body.home .fillbtn{background:#e6e6ec}
 
 <script>
 const MAX=28;
-const SCENES=[{"id": "beach", "name": "제주 바닷가", "desc": "현무암에 부서지는 파도, 몽돌, 갈매기, 포구의 어선", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "breakwater", "name": "방파제 파도", "x": 1008, "y": 792, "lv": 0.8, "ph": ["breakwater"]}, {"id": "shore", "name": "현무암 사이 파도", "x": 648, "y": 1080, "lv": 0.6, "ph": ["shore"]}, {"id": "pebbles", "name": "몽돌 구르는 소리", "x": 960, "y": 1464, "lv": 0.9, "ph": ["pebbles"]}, {"id": "gulls", "name": "갈매기", "x": 1192, "y": 240, "lv": 0.9, "ph": ["gulls"]}, {"id": "boat", "name": "어선 엔진", "x": 2616, "y": 828, "lv": 0.9, "ph": ["boat"]}, {"id": "grass", "name": "바닷바람에 흔들리는 풀", "x": 3360, "y": 1440, "lv": 0.7, "ph": ["grass"]}]}, {"id": "park", "name": "도시 숲 공원", "desc": "이른 아침의 분수, 까치, 비둘기, 스프링클러, 도시의 소리", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "magpie", "name": "까치", "x": 372, "y": 1080, "lv": 0.9, "ph": ["magpie"]}, {"id": "bike", "name": "공공자전거", "x": 1080, "y": 1008, "lv": 0.8, "ph": ["bike"]}, {"id": "pigeons", "name": "비둘기", "x": 1200, "y": 1224, "lv": 0.9, "ph": ["pigeons"]}, {"id": "sprinkler", "name": "스프링클러", "x": 2376, "y": 960, "lv": 0.8, "ph": ["sprinkler"]}, {"id": "sparrows", "name": "덤불 속 참새", "x": 2592, "y": 1092, "lv": 0.9, "ph": ["sparrows"]}, {"id": "fountain", "name": "분수", "x": 3552, "y": 1248, "lv": 0.7, "ph": ["fountain"]}, {"id": "traffic", "name": "멀리 차 소리", "x": 2760, "y": 930, "lv": 0.55, "ph": ["traffic"]}, {"id": "trees", "name": "나뭇잎 소리", "x": 3240, "y": 360, "lv": 0.7, "ph": ["trees"]}]}, {"id": "summit", "name": "설악 능선 정상", "desc": "구름바다 위 바람, 소나무, 까마귀, 매, 먼 폭포", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "pine", "name": "바람 맞는 소나무", "x": 480, "y": 792, "lv": 0.8, "ph": ["pine"]}, {"id": "crow", "name": "큰부리까마귀", "x": 1032, "y": 720, "lv": 0.9, "ph": ["crow"]}, {"id": "hawk", "name": "매", "x": 1656, "y": 324, "lv": 0.9, "ph": ["hawk"]}, {"id": "wind", "name": "구름 위 바람", "x": 2880, "y": 624, "lv": 0.75, "ph": ["wind"]}, {"id": "falls", "name": "먼 폭포", "x": 3048, "y": 1008, "lv": 0.5, "ph": ["falls"]}, {"id": "insects", "name": "풀벌레", "x": 3696, "y": 1344, "lv": 0.5, "ph": ["insects"]}]}, {"id": "camp", "name": "강원 계곡 캠핑장", "desc": "계곡물, 개구리, 화로대 불, 주전자, 매미, 딱따구리", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "stream", "name": "계곡 물소리", "x": 840, "y": 1260, "lv": 0.7, "ph": ["stream"]}, {"id": "frog", "name": "개구리", "x": 1596, "y": 1332, "lv": 0.9, "ph": ["frog"]}, {"id": "cicada", "name": "매미", "x": 1464, "y": 720, "lv": 0.6, "ph": ["cicada"]}, {"id": "birds", "name": "새소리", "x": 1644, "y": 105, "lv": 0.9, "ph": ["birds"]}, {"id": "woodpecker", "name": "숨은 딱따구리", "x": 2304, "y": 600, "lv": 1, "ph": ["woodpecker"]}, {"id": "fire", "name": "화로대 불", "x": 2724, "y": 1068, "lv": 0.9, "ph": ["fire"]}, {"id": "kettle", "name": "끓는 주전자", "x": 2916, "y": 1020, "lv": 0.8, "ph": ["kettle"]}, {"id": "leaves", "name": "나뭇잎 소리", "x": 3360, "y": 288, "lv": 0.65, "ph": ["leaves"]}]}];
+const SCENES=[{"id": "beach", "name": "제주 애월 해안", "desc": "현무암에 부서지는 파도, 몽돌, 갈매기, 포구의 어선", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "breakwater", "name": "방파제 파도", "x": 1008, "y": 792, "lv": 0.8, "ph": ["breakwater"]}, {"id": "shore", "name": "현무암 사이 파도", "x": 648, "y": 1080, "lv": 0.6, "ph": ["shore"]}, {"id": "pebbles", "name": "몽돌 구르는 소리", "x": 960, "y": 1464, "lv": 0.9, "ph": ["pebbles"]}, {"id": "gulls", "name": "갈매기", "x": 1192, "y": 240, "lv": 0.9, "ph": ["gulls"]}, {"id": "boat", "name": "어선 엔진", "x": 2616, "y": 828, "lv": 0.9, "ph": ["boat"]}, {"id": "grass", "name": "바닷바람에 흔들리는 풀", "x": 3360, "y": 1440, "lv": 0.7, "ph": ["grass"]}]}, {"id": "park", "name": "서울숲 공원", "desc": "이른 아침의 분수, 까치, 비둘기, 스프링클러, 도시의 소리", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "magpie", "name": "까치", "x": 372, "y": 1080, "lv": 0.9, "ph": ["magpie"]}, {"id": "bike", "name": "공공자전거", "x": 1080, "y": 1008, "lv": 0.8, "ph": ["bike"]}, {"id": "pigeons", "name": "비둘기", "x": 1200, "y": 1224, "lv": 0.9, "ph": ["pigeons"]}, {"id": "sprinkler", "name": "스프링클러", "x": 2376, "y": 960, "lv": 0.8, "ph": ["sprinkler"]}, {"id": "sparrows", "name": "덤불 속 참새", "x": 2592, "y": 1092, "lv": 0.9, "ph": ["sparrows"]}, {"id": "fountain", "name": "분수", "x": 3552, "y": 1248, "lv": 0.7, "ph": ["fountain"]}, {"id": "traffic", "name": "멀리 차 소리", "x": 2760, "y": 930, "lv": 0.55, "ph": ["traffic"]}, {"id": "trees", "name": "나뭇잎 소리", "x": 3240, "y": 360, "lv": 0.7, "ph": ["trees"]}]}, {"id": "summit", "name": "설악산 대청봉", "desc": "구름바다 위 바람, 소나무, 까마귀, 매, 먼 폭포", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "pine", "name": "바람 맞는 소나무", "x": 480, "y": 792, "lv": 0.8, "ph": ["pine"]}, {"id": "crow", "name": "큰부리까마귀", "x": 1032, "y": 720, "lv": 0.9, "ph": ["crow"]}, {"id": "hawk", "name": "매", "x": 1656, "y": 324, "lv": 0.9, "ph": ["hawk"]}, {"id": "wind", "name": "구름 위 바람", "x": 2880, "y": 624, "lv": 0.75, "ph": ["wind"]}, {"id": "falls", "name": "먼 폭포", "x": 3048, "y": 1008, "lv": 0.5, "ph": ["falls"]}, {"id": "insects", "name": "풀벌레", "x": 3696, "y": 1344, "lv": 0.5, "ph": ["insects"]}]}, {"id": "camp", "name": "인제 내린천 캠핑장", "desc": "계곡물, 개구리, 화로대 불, 주전자, 매미, 딱따구리", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "stream", "name": "계곡 물소리", "x": 840, "y": 1260, "lv": 0.7, "ph": ["stream"]}, {"id": "frog", "name": "개구리", "x": 1596, "y": 1332, "lv": 0.9, "ph": ["frog"]}, {"id": "cicada", "name": "매미", "x": 1464, "y": 720, "lv": 0.6, "ph": ["cicada"]}, {"id": "birds", "name": "새소리", "x": 1644, "y": 105, "lv": 0.9, "ph": ["birds"]}, {"id": "woodpecker", "name": "숨은 딱따구리", "x": 2304, "y": 600, "lv": 1, "ph": ["woodpecker"]}, {"id": "fire", "name": "화로대 불", "x": 2724, "y": 1068, "lv": 0.9, "ph": ["fire"]}, {"id": "kettle", "name": "끓는 주전자", "x": 2916, "y": 1020, "lv": 0.8, "ph": ["kettle"]}, {"id": "leaves", "name": "나뭇잎 소리", "x": 3360, "y": 288, "lv": 0.65, "ph": ["leaves"]}]}];
 const $=id=>document.getElementById(id),all=c=>document.querySelectorAll(c);
 let scene=null,SRC=[],PW=3840,PH=1536,R0=185;
 let power=true,vol=.7,rec=false,mode='field';   // always on: no power step
@@ -375,14 +406,28 @@ function goScene(id){
   const img=new Image();img.onload=()=>{
     scene=s;SRC=s.src;PW=s.w;PH=s.h;R0=s.r||185;
     $('panoImg').src=img.src;$('panoImg').width=PW;$('panoImg').height=PH;$('blurImg').src=`scenes/${id}-thumb.jpg`;
-    $('placeName').textContent=s.name;layout();cam.x=s.start?s.start[0]:PW/2;cam.y=s.start?s.start[1]:PH*.55;clampCam();
+    $('placeName').textContent=s.name;loadLum(id);layout();cam.x=s.start?s.start[0]:PW/2;cam.y=s.start?s.start[1]:PH*.55;clampCam();
     $('loading').classList.remove('on');ensureLive();if(ctx)loadSounds(id);
     if(mode!=='field')setMode('field');toast(`${s.name}에 도착했어요`);
   };
   img.onerror=()=>{$('loading').classList.remove('on');toast('장소를 불러오지 못했어요');};
   img.src=`scenes/${id}.jpg`;
 }
-$('placeBtn').addEventListener('click',()=>{buildCards();$('pkClose').style.display=scene?'block':'none';$('picker').classList.add('on');});
+function buildMenu(){$('pmenu').innerHTML=SCENES.map(s=>`<button role="option" class="${scene&&scene.id===s.id?'cur':''}" data-id="${s.id}"><img src="scenes/${s.id}-thumb.jpg" alt="">${s.name}</button>`).join('');
+  all('#pmenu button').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();closeMenu();initAudio();goScene(b.dataset.id);}));}
+function closeMenu(){$('pmenu').classList.remove('on');$('placeBtn').setAttribute('aria-expanded','false');}
+$('placeBtn').addEventListener('click',e=>{e.stopPropagation();const on=!$('pmenu').classList.contains('on');if(on){buildMenu();$('pmenu').classList.add('on');$('placeBtn').setAttribute('aria-expanded','true');}else closeMenu();});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.placewrap'))closeMenu();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+/* logo colour by background */
+const lumC=document.createElement('canvas'),lumX=lumC.getContext('2d',{willReadFrequently:true});let lumOK=false;
+function loadLum(id){lumOK=false;const im=new Image();im.onload=()=>{lumC.width=im.naturalWidth;lumC.height=im.naturalHeight;lumX.drawImage(im,0,0);lumOK=true;checkLogo();};im.src=`scenes/${id}-thumb.jpg`;}
+function checkLogo(){const br=$('brand');if(mode!=='field'||!lumOK||!sc){br.classList.remove('light');return;}
+  const r=br.getBoundingClientRect(),k=lumC.width/PW,toX=x=>(cam.x+(x-sw/2)/sc)*k,toY=y=>(cam.y+(y-sh/2)/sc)*k;
+  const x0=Math.max(0,Math.floor(toX(r.left))),y0=Math.max(0,Math.floor(toY(r.top))),w=Math.max(1,Math.ceil(toX(r.right))-x0),h=Math.max(1,Math.ceil(toY(r.bottom))-y0);
+  let d;try{d=lumX.getImageData(x0,y0,w,h).data;}catch(_){return;}let L=0;for(let i=0;i<d.length;i+=4)L+=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];L/=d.length/4;
+  br.classList.toggle('light',L<140);}
+setInterval(checkLogo,250);
 $('pkClose').addEventListener('click',()=>{if(scene)$('picker').classList.remove('on');});
 
 /* ---------- device ---------- */
@@ -400,7 +445,7 @@ all('.js-btn').forEach(btn=>{let pressT=null,longDone=false;
   btn.addEventListener('pointerup',()=>{btn.classList.remove('press');if(pressT){clearTimeout(pressT);pressT=null;if(!longDone)record();}});
   btn.addEventListener('pointerleave',()=>{btn.classList.remove('press');if(pressT){clearTimeout(pressT);pressT=null;}});
   btn.addEventListener('contextmenu',e=>e.preventDefault());});
-document.addEventListener('keydown',e=>{if(e.code==='Space'&&mode==='field'&&!e.repeat&&!$('picker').classList.contains('on')){e.preventDefault();initAudio();record();}});
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&mode==='field'&&!e.repeat&&!$('pmenu').classList.contains('on')){e.preventDefault();initAudio();record();}});
 const setBt=t=>all('.js-bt').forEach(x=>x.textContent=t);
 function togglePower(){
   power=!power;all('.js-pled').forEach(p=>p.classList.toggle('on',power));
@@ -421,14 +466,16 @@ function record(){
   setTimeout(()=>{state.shots.push(shot);save();rec=false;all('.js-rled').forEach(r=>r.classList.remove('on'));renderCounter();const n=state.shots.length;
     toast(n===MAX?'필름이 다 찼어요 · 이제 집에서 현상할 수 있어요':`${n}번째 순간을 담았어요 · ${MAX-n}장 남음`,n===MAX?4000:2200);},3000);
 }
-all('.js-demo').forEach(b=>b.addEventListener('click',()=>{
+$('fillBtn').addEventListener('click',()=>{if(mode==='home'){resetFilm();return;}fillRoll();});
+function resetFilm(){state={roll:state.roll,shots:[],developed:false};save();renderCounter();setMode('field');toast('필름을 비웠어요 · 처음부터 다시 담아보세요');}
+function fillRoll(){(()=>{
   if(state.developed){toast('앱에서 새 필름을 넣은 뒤 사용하세요');return;}
   const now=Date.now();
   while(state.shots.length<MAX){const S=SCENES[Math.floor(Math.random()*SCENES.length)],s=S.src[Math.floor(Math.random()*S.src.length)],r=S.r||185;
     const x=s.x+(Math.random()-.5)*r*.7,y=s.y+(Math.random()-.5)*r*.4;
     state.shots.push({sc:S.id,x:Math.round(x),y:Math.round(y),m:S.src.map(q=>+Math.exp(-Math.pow(Math.hypot(q.x-x,(q.y-y)*1.2)/r,2)).toFixed(3)),v:.7,t:now-(MAX-state.shots.length)*9*60000});}
-  save();renderCounter();toast('데모: 4곳의 소리로 28장이 채워졌어요 · 집 탭에서 현상해 보세요',3500);
-}));
+  save();renderCounter();toast('28장이 채워졌어요 · 어플 탭에서 현상해 보세요',3500);
+})();}
 
 /* ---------- app ---------- */
 let developing=false;
@@ -466,7 +513,7 @@ function playShot(i,b){
 }
 
 /* ---------- modes ---------- */
-function setMode(m){mode=m;document.body.classList.toggle('home',m==='home');$('mField').classList.toggle('on',m==='field');$('mHome').classList.toggle('on',m==='home');$('vField').classList.toggle('on',m==='field');$('vHome').classList.toggle('on',m==='home');setMaster();if(m==='home')renderApp();else layout();}
+function setMode(m){mode=m;closeMenu();$('fillBtn').textContent=m==='home'?'리셋하기':'한 롤 채우기';document.body.classList.toggle('home',m==='home');$('mField').classList.toggle('on',m==='field');$('mHome').classList.toggle('on',m==='home');$('vField').classList.toggle('on',m==='field');$('vHome').classList.toggle('on',m==='home');setMaster();if(m==='home')renderApp();else layout();}
 $('mField').addEventListener('click',()=>setMode('field'));$('mHome').addEventListener('click',()=>setMode('home'));
 let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms);}
 (function(){const cv=document.getElementById('ctr2d');if(!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height,SW=7.9,SH=7.9*804/1264,SX=35.0,SY=83.3;
