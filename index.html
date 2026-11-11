@@ -408,7 +408,6 @@ addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown
 addEventListener('keyup',e=>{delete keys[e.code];});
 stage.addEventListener('wheel',e=>{if(e.target.closest('.aside-a'))return;e.preventDefault();setVol(vol-e.deltaY/1200);},{passive:false});
 const aimPt=()=>({x:cam.x+(ptr.x-sw/2)/sc,y:cam.y+(ptr.y-sh/2)/sc});
-const FOCUS_MODE=new URLSearchParams(location.search).get('focus')==='both'?'both':'sound';
 let focus=null;const FDUR=750,FR=70;
 function setFocus(){const p=aimPt();focus={x:p.x,y:p.y,t0:performance.now()};$('flbl').style.opacity=0;
   const img=`url(scenes/${scene.id}.jpg)`;$('fsT').style.backgroundImage=img;$('fsB').style.backgroundImage=img;}
@@ -549,7 +548,7 @@ function record(){
   rec=true;all('.js-rled').forEach(r=>r.classList.add('on'));
   const f=$('flash');f.style.transition='none';f.style.opacity=.8;requestAnimationFrame(()=>{f.style.transition='opacity .6s';f.style.opacity=0;});
   const x=aim.x,y=aim.y,m=SRC.map(s=>+focusOf(s,x,y).toFixed(3));
-  const shot={sc:scene.id,x:Math.round(x),y:Math.round(y),m,v:+vol.toFixed(2),t:Date.now()};if(FOCUS_MODE==='both'&&focus)shot.crop=1;
+  const shot={sc:scene.id,x:Math.round(x),y:Math.round(y),m,v:+vol.toFixed(2),t:Date.now()};
   setTimeout(()=>{state.shots.push(shot);save();rec=false;all('.js-rled').forEach(r=>r.classList.remove('on'));renderCounter();const n=state.shots.length;
     toast(n===MAX?'필름이 다 찼어요 · 이제 집에서 현상할 수 있어요':`${n}번째 순간을 담았어요 · ${MAX-n}장 남음`,n===MAX?4000:2200);},3000);
 }
@@ -560,7 +559,7 @@ function fillRoll(){(()=>{
   const now=Date.now();
   while(state.shots.length<MAX){const S=SCENES[Math.floor(Math.random()*SCENES.length)],s=S.src[Math.floor(Math.random()*S.src.length)],r=S.r||185;
     const x=s.x+(Math.random()-.5)*r*.7,y=s.y+(Math.random()-.5)*r*.4;
-    state.shots.push({sc:S.id,x:Math.round(x),y:Math.round(y),m:S.src.map(q=>+Math.exp(-Math.pow(Math.hypot(q.x-x,(q.y-y)*1.2)/r,2)).toFixed(3)),v:.7,t:now-(MAX-state.shots.length)*9*60000,...(FOCUS_MODE==='both'?{crop:1}:{})});}
+    state.shots.push({sc:S.id,x:Math.round(x),y:Math.round(y),m:S.src.map(q=>+Math.exp(-Math.pow(Math.hypot(q.x-x,(q.y-y)*1.2)/r,2)).toFixed(3)),v:.7,t:now-(MAX-state.shots.length)*9*60000});}
   save();renderCounter();toast('28장이 채워졌어요 · 어플 탭에서 현상해 보세요',3500);
 })();}
 
@@ -569,9 +568,7 @@ let developing=false;
 function domOf(s){const S=sceneOf(s.sc);if(!S)return null;let bi=0;s.m.forEach((v,i)=>{if(v>s.m[bi])bi=i;});return s.m[bi]>.4?S.src[bi]:null;}
 const nameOf=s=>{const d=domOf(s);return d?d.name:'주변 소리';};
 const hhmm=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
-function thumb(s,i){const S=sceneOf(s.sc),d=domOf(s);
-  if(s.crop&&S){const W=S.w,H=S.h,w=W*.16,h=w/1.5,x=Math.max(w/2,Math.min(W-w/2,s.x)),y=Math.max(h/2,Math.min(H-h/2,s.y)),x0=x-w/2,y0=y-h/2;
-    return `<div class="amb" style="background-image:url(scenes/${s.sc}.jpg);background-size:${W/w*100}% auto;background-position:${x0/(W-w)*100}% ${y0/(H-h)*100}%"></div>`;}if(d&&d.ph&&d.ph.length)return `<img src="photos/${s.sc}/${d.ph[i%d.ph.length]}.jpg" alt="" loading="lazy">`;
+function thumb(s,i){const S=sceneOf(s.sc),d=domOf(s);if(d&&d.ph&&d.ph.length)return `<img src="photos/${s.sc}/${d.ph[i%d.ph.length]}.jpg" alt="" loading="lazy">`;
   const W=S.w,H=S.h,w=W*.18,h=w/1.5,x=Math.max(w/2,Math.min(W-w/2,s.x)),y=Math.max(h/2,Math.min(H-h/2,s.y)),x0=x-w/2,y0=y-h/2;
   return `<div class="amb" style="background-image:url(scenes/${s.sc}-thumb.jpg);background-size:${W/w*100}% auto;background-position:${x0/(W-w)*100}% ${y0/(H-h)*100}%"></div>`;}
 function renderApp(){
