@@ -467,8 +467,11 @@ function frame(now){
       
       fsp.style.transform=`translate(${fx}px,${fy}px)`;fsp.style.opacity=1;fr.style.transform=`scale(${k})`;fr.style.opacity=.35+.65*e2;
       aim={x:focus.x,y:focus.y};}}
-  if(!focus){$('fsplit').style.opacity=0;if(!ptr.ui)aim=aimPt();}
+  if(!focus){const fsp=$('fsplit');if(!ptr.ui)aim=aimPt();$('flbl').style.opacity=0;
+    if(rec){fsp.style.transform=`translate(${ptr.x}px,${ptr.y}px)`;$('fring').style.transform='scale(1)';$('fring').style.opacity=1;fsp.style.opacity=1;}else fsp.style.opacity=0;}
   {const fv=$('fview');let u=0;if(rec){const t=(now-recT0)/3000;u=t<.12?t/.12:(t>.85?Math.max(0,(1-t)/.15):1);}
+    const hx=sw/2+(aim.x-cam.x)*sc,hy=sh/2+(aim.y-cam.y)*sc;
+    const m=`radial-gradient(circle at ${hx}px ${hy}px,transparent ${FR-4}px,#000 ${FR+18}px)`;fv.style.maskImage=m;fv.style.webkitMaskImage=m;
     const bl=`blur(${(16*u).toFixed(2)}px)`;fv.style.backdropFilter=bl;fv.style.webkitBackdropFilter=bl;fv.style.opacity=u;}
   if(held){const ox=ptr.x/sw-.5,oy=ptr.y/sh-.5;held.style.transform=`translate(${ox*24}px,${oy*14}px) rotate(${-5+ox*4}deg)`;held.style.opacity=1;
 }
