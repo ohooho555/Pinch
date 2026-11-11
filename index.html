@@ -289,7 +289,7 @@ body.home #vHome{background:#fafafa}
 .fsplit .h{position:absolute;inset:0;border-radius:50%;background-repeat:no-repeat;overflow:hidden}
 .fsplit .h.t{clip-path:inset(0 0 50% 0)}
 .fsplit .h.b{clip-path:inset(50% 0 0 0)}
-.fsplit::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(0,0,0,.15),0 4px 18px rgba(0,0,0,.25)}
+.fsplit .fring{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(0,0,0,.15),0 4px 18px rgba(0,0,0,.25);transform-origin:50% 50%}
 .fsplit .seam{position:absolute;left:0;right:0;top:50%;height:1px;margin-top:-.5px;background:rgba(255,255,255,.7)}
 .fsplit .flbl{position:absolute;left:50%;top:calc(100% + 12px);transform:translateX(-50%);white-space:nowrap;background:rgba(30,30,36,.8);color:#fff;font-size:13px;padding:5px 11px;border-radius:999px;opacity:0;transition:opacity .3s}
 </style>
@@ -311,7 +311,7 @@ body.home #vHome{background:#fafafa}
     <img class="blurbg" id="blurImg" alt=""><div class="pano" id="pano"><img id="panoImg" alt=""></div>
     <div class="vig"></div>
     <div class="fblur" id="fblur"></div>
-    <div class="fsplit" id="fsplit"><div class="h t" id="fsT"></div><div class="h b" id="fsB"></div><i class="seam" id="fsSeam"></i><div class="flbl" id="flbl"></div></div>
+    <div class="fsplit" id="fsplit"><i class="fring" id="fring"></i><div class="flbl" id="flbl"></div></div>
     <div class="reticle" id="ret"><div class="wave" id="wave"></div><div class="ring"></div><div class="dot"></div><div class="lbl" id="lbl"></div></div>
     <div class="flash" id="flash"></div>
     <div class="tip" id="tip">소리가 나는 곳을 클릭해 초점을 맞추고 · 빨간 버튼을 눌러 채집해요</div>
@@ -409,8 +409,7 @@ addEventListener('keyup',e=>{delete keys[e.code];});
 stage.addEventListener('wheel',e=>{if(e.target.closest('.aside-a'))return;e.preventDefault();setVol(vol-e.deltaY/1200);},{passive:false});
 const aimPt=()=>({x:cam.x+(ptr.x-sw/2)/sc,y:cam.y+(ptr.y-sh/2)/sc});
 let focus=null;const FDUR=750,FR=70;
-function setFocus(){const p=aimPt();focus={x:p.x,y:p.y,t0:performance.now()};$('flbl').style.opacity=0;
-  const img=`url(scenes/${scene.id}.jpg)`;$('fsT').style.backgroundImage=img;$('fsB').style.backgroundImage=img;}
+function setFocus(){const p=aimPt();focus={x:p.x,y:p.y,t0:performance.now()};$('flbl').style.opacity=0;}
 function clearFocus(){focus=null;}
 const ease=t=>1-Math.pow(1-t,3);
 
@@ -462,13 +461,9 @@ function frame(now){
   let fp=0;
   if(focus){const fx=sw/2+(focus.x-cam.x)*sc,fy=sh/2+(focus.y-cam.y)*sc;
     if(fx<-FR||fy<-FR||fx>sw+FR||fy>sh+FR)clearFocus();
-    else{fp=Math.min(1,(now-focus.t0)/FDUR);const e2=ease(fp),R=FR+ (1-e2)*220,d=(1-e2)*40,bs=`${PW*sc}px ${PH*sc}px`,
-      ox=sw/2-cam.x*sc-(fx-FR),oy=sh/2-cam.y*sc-(fy-FR),fb=$('fblur'),fsp=$('fsplit');
+    else{fp=Math.min(1,(now-focus.t0)/FDUR);const e2=ease(fp),k=1+(1-e2)*2.2,R=FR*k,fb=$('fblur'),fsp=$('fsplit'),fr=$('fring');
       const m=`radial-gradient(circle at ${fx}px ${fy}px,transparent ${R}px,#000 ${R+60}px)`;fb.style.maskImage=m;fb.style.webkitMaskImage=m;fb.style.opacity=1;
-      fsp.style.transform=`translate(${fx}px,${fy}px)`;fsp.style.opacity=1;
-      $('fsT').style.backgroundSize=bs;$('fsB').style.backgroundSize=bs;
-      $('fsT').style.backgroundPosition=`${ox-d}px ${oy}px`;$('fsB').style.backgroundPosition=`${ox+d}px ${oy}px`;
-      $('fsSeam').style.opacity=1-e2;
+      fsp.style.transform=`translate(${fx}px,${fy}px)`;fsp.style.opacity=1;fr.style.transform=`scale(${k})`;fr.style.opacity=.35+.65*e2;
       aim={x:focus.x,y:focus.y};}}
   if(!focus){$('fblur').style.opacity=0;$('fsplit').style.opacity=0;if(!ptr.ui)aim=aimPt();}
   if(held){const ox=ptr.x/sw-.5,oy=ptr.y/sh-.5;held.style.transform=`translate(${ox*24}px,${oy*14}px) rotate(${-5+ox*4}deg)`;held.style.opacity=1;
