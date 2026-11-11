@@ -212,13 +212,16 @@ body.home .brand{background:transparent;padding-left:0;backdrop-filter:none;-web
 .b3d canvas{display:block;width:100%;height:100%}
 .devB3 .hbtn{position:absolute;background:transparent;border:0;border-radius:6px;cursor:pointer}
 .devB3 .hbtn:hover{outline:2px solid rgba(43,43,51,.35);outline-offset:2px}
+.fillbtn{border:0;background:rgba(255,255,255,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;padding:12px 16px;font-size:13px;color:#33333b;cursor:pointer;margin-right:8px;font-family:inherit}
+.fillbtn:hover{background:rgba(255,255,255,.85)}
+body.home .fillbtn{background:#e6e6ec}
 </style>
 </head>
 <body>
 
 <header>
   <div class="brand"><img src="logo.svg" alt="Pinch"><small>Sound Collection Device · 사용 시뮬레이션</small></div>
-  <div class="right"><div class="lay" id="lay"><button data-l="la" class="on">시안 A · 손에 든 기기</button><button data-l="lb">시안 B · 오른쪽 패널</button></div><button class="place" id="placeBtn">장소 · <b id="placeName">고르기</b> ▾</button><div class="modes"><button id="mField" class="on">현장</button><button id="mHome">집 · Pinch 앱</button></div></div>
+  <div class="right"><button class="fillbtn js-demo" id="fillBtn">남은 장 채우기</button><button class="place" id="placeBtn">장소 · <b id="placeName">고르기</b> ▾</button><div class="modes"><button id="mField" class="on">현장</button><button id="mHome">집 · Pinch 앱</button></div></div>
 </header>
 
 <section class="view on" id="vField">
@@ -234,31 +237,12 @@ body.home .brand{background:transparent;padding-left:0;backdrop-filter:none;-web
       <img class="devimg" src="device_back.png" alt="Pinch 뒷면" draggable="false">
       <canvas class="ctr2d" id="ctr2d" width="1264" height="688"></canvas>
       <div class="recglow" id="recglow"></div>
-      <div class="held3d" id="held3d"></div>
       <button class="hbtn js-btn" id="hbtn3d" aria-label="전원/채집 버튼"></button>
       <div class="hcap" id="hcap3d">길게: 전원 · 짧게: 채집</div>
     </div>
-    <aside class="aside-a">
-      <div class="chip"><span>무선 이어폰</span><span class="js-bt">—</span></div>
-      <div class="chip"><span>휴대폰</span><span>주머니 속</span></div>
-      <div class="vol">볼륨<input type="range" class="js-vol" min="0" max="100" value="70"></div>
-      <p class="hint"><b>Space</b>로도 채집할 수 있어요. 이어폰을 끼면 방향도 느껴져요.</p>
-      <button class="ghost js-demo">전시용 데모 · 남은 장 자동으로 채우기</button>
-    </aside>
+
   </div>
-  <aside class="panelB">
-    <h3>DEVICE</h3>
-    <div class="devB3">
-      <div class="b3d" id="b3d"></div>
-      <button class="hbtn js-btn" id="hbtnB" aria-label="전원/채집 버튼"></button>
-    </div>
-    <div class="backB"><div class="counter mono off js-counter">--</div><div class="rled js-rled"><b></b>REC</div></div>
-    <div class="rowB"><span>볼륨</span><input type="range" class="js-vol" min="0" max="100" value="70"></div>
-    <div class="rowB"><span>무선 이어폰</span><span class="js-bt">—</span></div>
-    <div class="rowB"><span>휴대폰</span><span>주머니 속</span></div>
-    <p class="hint"><b>빨간 버튼 길게</b>: 전원 켜기/끄기<br><b>짧게</b> 또는 <b>Space</b>: 소리+장면 채집 (3초)<br>마우스로 장면 속을 겨눠 소리를 찾아보세요.</p>
-    <button class="ghost js-demo">전시용 데모 · 남은 장 자동으로 채우기</button>
-  </aside>
+
 </section>
 
 <section class="view" id="vHome">
@@ -492,137 +476,12 @@ let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classL
   (document.fonts?document.fonts.load('500 100px Jost'):Promise.resolve()).finally(()=>{last='';});draw();})();
 window.simPower=()=>power;window.simCount=()=>state.shots.length;window.simRec=()=>rec;window.simVol=()=>vol;
 document.body.classList.add('la');
-all('#lay button').forEach(b=>b.addEventListener('click',()=>{all('#lay button').forEach(x=>x.classList.toggle('on',x===b));document.body.classList.remove('la','lb');document.body.classList.add(b.dataset.l);layout();setVol(vol);}));
+
 goScene(SCENES[Math.floor(Math.random()*SCENES.length)].id);
 layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);
 
 </script>
 
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
-<script src="pinch-model.js"></script>
-<script type="module">
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-const boxA = document.getElementById('held3d'), boxB = document.getElementById('b3d'), btnA = document.getElementById('hbtn3d'), btnB = document.getElementById('hbtnB'), hcap = document.getElementById('hcap3d');
-let box3d = boxA, hbtn = btnA;
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setClearColor(0x000000, 0);
-renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = .8;
-box3d.appendChild(renderer.domElement);
-const scene = new THREE.Scene();
-const pm = new THREE.PMREMGenerator(renderer);
-function studioEnv() {
-  const env = new THREE.Scene(); env.background = new THREE.Color(0xcdcdd0);
-  const box = (w, h, x, y, z, i) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(i, i, i), side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 0, 0); env.add(m); };
-  box(4, 3, 0, 5, 1, 3.2); box(1.2, 5, -4, 1, 2, 2.4); box(.6, 5, 4, 1, -1.5, 3.0); box(.6, 5, -2.5, 1, -4, 2.0); box(6, 2, 0, -3, 3, 1.1); box(5, 4, 0, 1, 5, .9); box(5, 4, 0, 1, -5, 1.4);
-  return pm.fromScene(env, .02).texture;
-}
-scene.environment = studioEnv();
-const camera = new THREE.PerspectiveCamera(24, 1, .005, 5);
-let model, parts = {}, tickPivot, btnHome = new THREE.Vector3(), count = 0;
-let power = false; // shadowed locally; synced from the simulation each frame
-const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
-const bin = Uint8Array.from(atob(window.PINCH_GLB), c => c.charCodeAt(0)).buffer;
-loader.parse(bin, '', g => {
-  model = g.scene;
-  model.traverse(o => {
-    if (o.isMesh) {
-      const m = o.material, pn = o.parent ? o.parent.name : '';
-      if (m.transmission > 0 && pn !== 'mat_glass') { m.color.setStyle('#ebebef'); m.roughness = .36; m.ior = 1.48; m.thickness = .0055; m.transmission = .76; m.attenuationColor = new THREE.Color().setStyle('#dedee2'); m.attenuationDistance = .045; m.specularIntensity = .7; m.clearcoat = .35; m.clearcoatRoughness = .2; }
-      if (['mat_frame', 'mat_dish'].includes(pn)) m.roughness = .42;
-      if (pn === 'mat_dish') m.color.setStyle('#b7b6cc');
-      if (pn === 'mat_frame') { m.color.setStyle('#c6c6ca'); m.emissive = m.color.clone().multiplyScalar(.1); }
-      if (pn === 'mat_print_front') m.color.setStyle('#ffffff');
-      if (['button', 'tick', 'mic'].includes(pn)) m.roughness = .36;
-      if (pn === 'mat_glass') { m.transmission = 1; m.roughness = .03; m.thickness = .0005; m.ior = 1.5; }
-    }
-    if (o.name) parts[o.name] = o;
-  });
-  scene.add(model);
-  const db = new THREE.Box3().setFromObject(parts.mat_dish), dc = db.getCenter(new THREE.Vector3());
-  tickPivot = new THREE.Group(); tickPivot.position.set(dc.x, dc.y, 0); model.add(tickPivot); tickPivot.attach(parts.tick);
-  btnHome.copy(parts.button.position);
-  ['rec_led', 'led'].forEach(n => parts[n] && parts[n].traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.emissive = new THREE.Color(0, 0, 0); } }));
-  buildCounter();
-  // first-person hold: we look at the back, slightly from above-right
-  const bb = new THREE.Box3().setFromObject(model), c = bb.getCenter(new THREE.Vector3());
-  aimAt = c.clone().add(new THREE.Vector3(0, .008, 0));
-  resize();
-}, e => console.error(e));
-let aimAt = new THREE.Vector3();
-// ---------- live counter on the back screen (original layout: 3 rotated pairs) ----------
-// screen window 7.9 x 4.3 mm, centre at model (35.0, 83.3); pairs at x 31.6 / 35.0 / 38.3, dots at 33.1 / 36.8 (mm, model space)
-let ctrCanvas, ctrTex, ctrMesh;
-const SW = 7.9, SH = 4.3, SX = 35.0, SY = 83.3;
-function buildCounter() {
-  const d = parts.digits; if (!d) return;
-  const bb = new THREE.Box3().setFromObject(d), c = bb.getCenter(new THREE.Vector3());
-  // digits bbox centre in model mm is ~ (35.0, 83.0): offset so the plane sits on the screen window centre
-  d.visible = false;
-  ctrCanvas = document.createElement('canvas'); ctrCanvas.width = 1264; ctrCanvas.height = Math.round(1264 * SH / SW);
-  ctrTex = new THREE.CanvasTexture(ctrCanvas); ctrTex.colorSpace = THREE.SRGBColorSpace; ctrTex.anisotropy = 8;
-  ctrMesh = new THREE.Mesh(new THREE.PlaneGeometry(SW / 1000, SH / 1000), new THREE.MeshBasicMaterial({ map: ctrTex, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2 }));
-  ctrMesh.position.set(c.x, c.y + (SY - 83.0) / 1000, bb.min.z - .00005); ctrMesh.rotation.y = Math.PI;
-  model.add(ctrMesh);
-  (document.fonts ? document.fonts.load('500 200px Jost') : Promise.resolve()).finally(drawCounter); drawCounter();
-}
-function drawCounter() {
-  if (!ctrCanvas) return;
-  const g = ctrCanvas.getContext('2d'), W = ctrCanvas.width, H = ctrCanvas.height;
-  const px = mm => mm / SW * W;                       // mm -> px
-  const X = xm => W / 2 + px(SX - xm);                // model x grows to the left when seen from the back
-  const Y = ym => H / 2 + px(SY - ym);
-  g.fillStyle = '#1b1b1d'; g.fillRect(0, 0, W, H);
-  // film-counter dial: current shot in the centre, previous on one side, next on the other (as in the original 23·25·27)
-  const nums = [count + 1, count, count - 1];
-  const groups = nums.map(n => (n >= 0 && n <= 28) ? String(n).padStart(2, '0') : '');
-  const xs = [31.6, 35.0, 38.3];
-  g.fillStyle = power ? '#f2f2f2' : 'rgba(242,242,242,.13)';
-  g.shadowColor = 'rgba(255,255,255,.45)'; g.shadowBlur = power ? 14 : 0;
-  g.font = `500 ${Math.round(px(1.8))}px Jost, Futura, "Avenir Next", "Century Gothic", "Helvetica Neue", Arial, sans-serif`;
-  g.textAlign = 'center'; g.textBaseline = 'middle';
-  const ys = [83.55, 83.05, 82.5];   // original pairs are staggered: right high, left low
-  groups.forEach((t, k) => { g.save(); g.translate(X(xs[k]), Y(ys[k])); g.rotate(Math.PI / 2); g.fillText(t, 0, 0); g.restore(); });
-  [33.1, 36.8].forEach(xm => { g.beginPath(); g.arc(X(xm), Y(83.0), px(.2), 0, Math.PI * 2); g.fill(); });
-  ctrTex.needsUpdate = true;
-}
 
-function ptMaterials() {}
-const DIAL_CCW = 1.78, DIAL_CW = -1.13;
-let lastKey = '';
-function resize() {
-  const w = box3d.clientWidth, h = box3d.clientHeight; if (!w) return;
-  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
-}
-addEventListener('resize', resize); const ro = new ResizeObserver(resize); ro.observe(boxA); ro.observe(boxB);
-const v = new THREE.Vector3();
-renderer.setAnimationLoop(t => {
-  if (!model) return;
-  const isB = document.body.classList.contains('lb');
-  if (!isB) return;
-  const want = boxB; if (renderer.domElement.parentNode !== want) { want.appendChild(renderer.domElement); box3d = want; hbtn = btnB; resize(); }
-  if (!box3d.clientWidth) return;
-  // sync with the simulation's global state (classic-script globals)
-  const P = window.simPower(), N = window.simCount(), R = window.simRec(), V = window.simVol();
-  power = P; count = N;
-  const key = P + '|' + N; if (key !== lastKey) { lastKey = key; drawCounter(); }
-  tickPivot.rotation.z = DIAL_CCW - V * (DIAL_CCW - DIAL_CW);
-  const recOn = R && Math.floor(t / 250) % 2 === 0;
-  parts.rec_led && parts.rec_led.traverse(o => { if (o.isMesh) { o.material.emissive.set(recOn ? 0xff2020 : 0); o.material.emissiveIntensity = recOn ? 2.4 : 0; } });
-  parts.led && parts.led.traverse(o => { if (o.isMesh) { o.material.emissive.set(P ? 0xffffff : 0); o.material.emissiveIntensity = P ? 2 : 0; } });
-  parts.button.position.copy(btnHome); if (hbtn.classList.contains('press')) parts.button.position.x -= .0012;
-  // camera: behind the device, a little above and to the right, gentle hand sway
-  const sw = Math.sin(t / 1400) * .004, sh = Math.cos(t / 1700) * .003;
-  if (isB) camera.position.set(aimAt.x + .12 + sw * .5, aimAt.y + .045, aimAt.z + .3);   // front 3/4 view in the panel
-  else camera.position.set(aimAt.x - .1 + sw, aimAt.y + .07 + sh, aimAt.z - .32);        // first-person back view
-  camera.lookAt(aimAt);
-  renderer.render(scene, camera);
-  // place the invisible hit area over the 3D button
-  const bb = new THREE.Box3().setFromObject(parts.button), c = bb.getCenter(v).project(camera);
-  const w = box3d.clientWidth, h = box3d.clientHeight, x = (c.x + 1) / 2 * w, y = (1 - c.y) / 2 * h;
-  if (isB) { hbtn.style.left = (x - 16) + 'px'; hbtn.style.top = (y - 34) + 'px'; hbtn.style.width = '32px'; hbtn.style.height = '68px'; }
-});
-</script>
 </body>
 </html>
