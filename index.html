@@ -289,6 +289,7 @@ body.home #vHome{background:#fafafa}
 .fsplit .flbl{position:absolute;left:50%;top:calc(100% + 12px);transform:translateX(-50%);white-space:nowrap;background:rgba(30,30,36,.8);color:#fff;font-size:13px;padding:5px 11px;border-radius:999px;opacity:0;transition:opacity .3s}
 .fmiss{position:absolute;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);pointer-events:none;transform:scale(2.2);opacity:.6;transition:transform .6s cubic-bezier(.65,0,.35,1),opacity .6s ease}
 .fmiss.go{transform:scale(1.5);opacity:0}
+.fview{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse 62% 66% at 50% 50%,rgba(0,0,0,0) 55%,rgba(10,8,6,.55) 82%,rgba(5,4,3,.92) 100%)}
 </style>
 </head>
 <body>
@@ -307,6 +308,7 @@ body.home #vHome{background:#fafafa}
   <div class="stage" id="stage">
     <img class="blurbg" id="blurImg" alt=""><div class="pano" id="pano"><img id="panoImg" alt=""></div>
     <div class="vig"></div>
+    <div class="fview" id="fview"></div>
     <div class="fsplit" id="fsplit"><i class="fring" id="fring"></i><div class="flbl" id="flbl"></div></div>
     <div class="reticle" id="ret"><div class="wave" id="wave"></div><div class="ring"></div><div class="dot"></div><div class="lbl" id="lbl"></div></div>
     <div class="flash" id="flash"></div>
@@ -461,11 +463,11 @@ function frame(now){
   let fp=0;
   if(focus){const fx=sw/2+(focus.x-cam.x)*sc,fy=sh/2+(focus.y-cam.y)*sc;
     if(fx<-FR||fy<-FR||fx>sw+FR||fy>sh+FR)clearFocus();
-    else{fp=Math.min(1,(now-focus.t0)/FDUR);const e2=ease(fp),k=1+(1-e2)*2.2,R=FR*k,fsp=$('fsplit'),fr=$('fring');
+    else{fp=Math.min(1,(now-focus.t0)/FDUR);const e2=ease(fp),k=1+(1-e2)*1.2,R=FR*k,fsp=$('fsplit'),fr=$('fring');
       
-      fsp.style.transform=`translate(${fx}px,${fy}px)`;fsp.style.opacity=1;fr.style.transform=`scale(${k})`;fr.style.opacity=.35+.65*e2;
+      fsp.style.transform=`translate(${fx}px,${fy}px)`;const fv=$('fview'),u=Math.pow(1-fp,1.3),bl=`blur(${(9*u).toFixed(2)}px)`;fv.style.backdropFilter=bl;fv.style.webkitBackdropFilter=bl;fv.style.opacity=u;fsp.style.opacity=1;fr.style.transform=`scale(${k})`;fr.style.opacity=.35+.65*e2;
       aim={x:focus.x,y:focus.y};}}
-  if(!focus){$('fsplit').style.opacity=0;if(!ptr.ui)aim=aimPt();}
+  if(!focus){$('fview').style.opacity=0;$('fsplit').style.opacity=0;if(!ptr.ui)aim=aimPt();}
   if(held){const ox=ptr.x/sw-.5,oy=ptr.y/sh-.5;held.style.transform=`translate(${ox*24}px,${oy*14}px) rotate(${-5+ox*4}deg)`;held.style.opacity=1;
 }
   const fk=focus?1-.35*ease(fp):1;const fs=SRC.map(s=>Math.exp(-Math.pow(Math.hypot(s.x-aim.x,(s.y-aim.y)*1.2)/(R0*fk),2)));let bi=0;fs.forEach((f,i)=>{if(f>fs[bi])bi=i;});
