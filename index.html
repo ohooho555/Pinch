@@ -377,7 +377,8 @@ body.home #vHome{background:#fafafa}
 
 <script>
 const MAX=28;
-const GRADE=new URLSearchParams(location.search).has('grade'),SD=GRADE?'scenes_g':'scenes',PD=GRADE?'photos_g':'photos';
+const QS=new URLSearchParams(location.search),GRADE=QS.has('grade'),DARK=QS.has('dark'),SD=GRADE?'scenes_g':'scenes',PD=GRADE?'photos_g':'photos';
+const sd=id=>DARK&&id==='beach'?'scenes_dark':SD,pd=id=>DARK&&id==='beach'?'photos_dark':PD;
 const SCENES=[{"id": "beach", "name": "제주 애월 해안", "desc": "현무암에 부서지는 파도, 몽돌, 갈매기, 포구의 어선", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "breakwater", "name": "방파제 파도", "x": 1008, "y": 792, "lv": 0.8, "ph": ["breakwater"]}, {"id": "shore", "name": "현무암 사이 파도", "x": 648, "y": 1080, "lv": 0.6, "ph": ["shore"]}, {"id": "pebbles", "name": "몽돌 구르는 소리", "x": 960, "y": 1464, "lv": 0.9, "ph": ["pebbles"]}, {"id": "gulls", "name": "갈매기", "x": 1192, "y": 240, "lv": 0.9, "ph": ["gulls"]}, {"id": "boat", "name": "어선 엔진", "x": 2616, "y": 828, "lv": 0.9, "ph": ["boat"]}, {"id": "grass", "name": "바닷바람에 흔들리는 풀", "x": 3360, "y": 1440, "lv": 0.7, "ph": ["grass"]}]}, {"id": "park", "name": "서울숲 공원", "desc": "이른 아침의 분수, 까치, 비둘기, 스프링클러, 도시의 소리", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "magpie", "name": "까치", "x": 372, "y": 1080, "lv": 0.9, "ph": ["magpie"]}, {"id": "bike", "name": "공공자전거", "x": 1080, "y": 1008, "lv": 0.8, "ph": ["bike"]}, {"id": "pigeons", "name": "비둘기", "x": 1200, "y": 1224, "lv": 0.9, "ph": ["pigeons"]}, {"id": "sprinkler", "name": "스프링클러", "x": 2376, "y": 960, "lv": 0.8, "ph": ["sprinkler"]}, {"id": "sparrows", "name": "덤불 속 참새", "x": 2592, "y": 1092, "lv": 0.9, "ph": ["sparrows"]}, {"id": "fountain", "name": "분수", "x": 3552, "y": 1248, "lv": 0.7, "ph": ["fountain"]}, {"id": "traffic", "name": "멀리 차 소리", "x": 2760, "y": 930, "lv": 0.55, "ph": ["traffic"]}, {"id": "trees", "name": "나뭇잎 소리", "x": 3240, "y": 360, "lv": 0.7, "ph": ["trees"]}]}, {"id": "summit", "name": "설악산 대청봉", "desc": "구름바다 위 바람, 소나무, 까마귀, 매, 먼 폭포", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "pine", "name": "바람 맞는 소나무", "x": 480, "y": 792, "lv": 0.8, "ph": ["pine"]}, {"id": "crow", "name": "큰부리까마귀", "x": 1032, "y": 720, "lv": 0.9, "ph": ["crow"]}, {"id": "hawk", "name": "매", "x": 1656, "y": 324, "lv": 0.9, "ph": ["hawk"]}, {"id": "wind", "name": "구름 위 바람", "x": 2880, "y": 624, "lv": 0.75, "ph": ["wind"]}, {"id": "falls", "name": "먼 폭포", "x": 3048, "y": 1008, "lv": 0.5, "ph": ["falls"]}, {"id": "insects", "name": "풀벌레", "x": 3696, "y": 1344, "lv": 0.5, "ph": ["insects"]}]}, {"id": "camp", "name": "내린천 캠핑장", "desc": "계곡물, 개구리, 화로대 불, 주전자, 매미, 딱따구리", "w": 3840, "h": 1610, "r": 180, "start": [1920, 885], "src": [{"id": "stream", "name": "계곡 물소리", "x": 840, "y": 1260, "lv": 0.7, "ph": ["stream"]}, {"id": "frog", "name": "개구리", "x": 1596, "y": 1332, "lv": 0.9, "ph": ["frog"]}, {"id": "cicada", "name": "매미", "x": 1464, "y": 720, "lv": 0.6, "ph": ["cicada"]}, {"id": "birds", "name": "새소리", "x": 1644, "y": 105, "lv": 0.9, "ph": ["birds"]}, {"id": "woodpecker", "name": "숨은 딱따구리", "x": 2304, "y": 600, "lv": 1, "ph": ["woodpecker"]}, {"id": "fire", "name": "화로대 불", "x": 2724, "y": 1068, "lv": 0.9, "ph": ["fire"]}, {"id": "kettle", "name": "끓는 주전자", "x": 2916, "y": 1020, "lv": 0.8, "ph": ["kettle"]}, {"id": "leaves", "name": "나뭇잎 소리", "x": 3360, "y": 288, "lv": 0.65, "ph": ["leaves"]}]}];
 const $=id=>document.getElementById(id),all=c=>document.querySelectorAll(c);
 let scene=null,SRC=[],PW=3840,PH=1536,R0=185;
@@ -491,7 +492,7 @@ function frame(now){
 }
 
 /* ---------- places ---------- */
-function buildCards(){$('cards').innerHTML=SCENES.map(s=>`<button class="card ${scene&&scene.id===s.id?'cur':''}" data-id="${s.id}"><div class="cimg" style="background-image:url(${SD}/${s.id}-thumb.jpg)"></div><div class="cbody"><h3>${s.name}</h3><p>${s.desc}</p></div></button>`).join('');
+function buildCards(){$('cards').innerHTML=SCENES.map(s=>`<button class="card ${scene&&scene.id===s.id?'cur':''}" data-id="${s.id}"><div class="cimg" style="background-image:url(${sd(s.id)}/${s.id}-thumb.jpg)"></div><div class="cbody"><h3>${s.name}</h3><p>${s.desc}</p></div></button>`).join('');
   all('.card').forEach(c=>c.addEventListener('click',()=>{initAudio();goScene(c.dataset.id);}));}
 function goScene(id){
   const s=sceneOf(id);$('picker').classList.remove('on');if(scene&&scene.id===id)return;
@@ -500,13 +501,13 @@ function goScene(id){
     if(scene){const snap=document.createElement('div');snap.className='xfade';snap.appendChild($('blurImg').cloneNode());snap.appendChild(pano.cloneNode(true));snap.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));stage.insertBefore(snap,$('ret')&&$('ret').parentNode===stage?$('ret'):null);
       requestAnimationFrame(()=>requestAnimationFrame(()=>{snap.style.opacity='0';}));setTimeout(()=>snap.remove(),XF*1000+120);}
     clearFocus();scene=s;SRC=s.src;PW=s.w;PH=s.h;R0=s.r||185;
-    $('panoImg').src=img.src;$('panoImg').width=PW;$('panoImg').height=PH;$('blurImg').src=`${SD}/${id}-thumb.jpg`;
+    $('panoImg').src=img.src;$('panoImg').width=PW;$('panoImg').height=PH;$('blurImg').src=`${sd(id)}/${id}-thumb.jpg`;
     $('placeName').textContent=s.name;checkLogo();layout();cam.x=s.start?s.start[0]:PW/2;cam.y=s.start?s.start[1]:PH*.55;clampCam();
     $('loading').classList.remove('on');ensureLive();if(ctx)loadSounds(id);
     if(mode!=='field')setMode('field');toast(`${s.name}에 도착했어요`);
   };
   img.onerror=()=>{clearTimeout(ldT);$('loading').classList.remove('on');toast('장소를 불러오지 못했어요');};
-  img.src=`${SD}/${id}.jpg`;
+  img.src=`${sd(id)}/${id}.jpg`;
 }
 function buildMenu(){$('pmenu').innerHTML=SCENES.map(s=>`<button role="option" class="${scene&&scene.id===s.id?'cur':''}" data-id="${s.id}">${s.name}</button>`).join('');
   all('#pmenu button').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();closeMenu();initAudio();goScene(b.dataset.id);}));}
@@ -572,9 +573,9 @@ let developing=false;
 function domOf(s){const S=sceneOf(s.sc);if(!S)return null;let bi=0;s.m.forEach((v,i)=>{if(v>s.m[bi])bi=i;});return s.m[bi]>.4?S.src[bi]:null;}
 const nameOf=s=>{const d=domOf(s);return d?d.name:'주변 소리';};
 const hhmm=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
-function thumb(s,i){const S=sceneOf(s.sc),d=domOf(s);if(d&&d.ph&&d.ph.length)return `<img src="${PD}/${s.sc}/${d.ph[i%d.ph.length]}.jpg" alt="" loading="lazy">`;
+function thumb(s,i){const S=sceneOf(s.sc),d=domOf(s);if(d&&d.ph&&d.ph.length)return `<img src="${pd(s.sc)}/${s.sc}/${d.ph[i%d.ph.length]}.jpg" alt="" loading="lazy">`;
   const W=S.w,H=S.h,w=W*.18,h=w/1.5,x=Math.max(w/2,Math.min(W-w/2,s.x)),y=Math.max(h/2,Math.min(H-h/2,s.y)),x0=x-w/2,y0=y-h/2;
-  return `<div class="amb" style="background-image:url(${SD}/${s.sc}-thumb.jpg);background-size:${W/w*100}% auto;background-position:${x0/(W-w)*100}% ${y0/(H-h)*100}%"></div>`;}
+  return `<div class="amb" style="background-image:url(${sd(s.sc)}/${s.sc}-thumb.jpg);background-size:${W/w*100}% auto;background-position:${x0/(W-w)*100}% ${y0/(H-h)*100}%"></div>`;}
 function renderApp(){
   const a=$('app'),n=state.shots.length,full=n>=MAX;$('rollNo').textContent='ROLL '+String(state.roll).padStart(2,'0');
   $('fpN').textContent=n;$('fpBars').innerHTML=Array.from({length:MAX},(_,i)=>`<i class="${i<n?'f':''}"></i>`).join('');
