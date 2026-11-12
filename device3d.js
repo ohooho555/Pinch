@@ -12,7 +12,7 @@ const held = document.getElementById('held');
 held.classList.add('d3');
 const W = held.offsetWidth, H = held.offsetHeight;
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, premultipliedAlpha: false });
-renderer.setPixelRatio(Math.max(2, Math.min(devicePixelRatio * 1.5, 3)));  // supersample for clean edges
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(W, H);
 renderer.setClearColor(0x000000, 0);
 renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
@@ -33,7 +33,7 @@ scene.environment = studioEnv();
 // real studio HDRI (Poly Haven, CC0); falls back to the procedural studio if it can't load
 new RGBELoader().load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr', t => {
   t.mapping = THREE.EquirectangularReflectionMapping; scene.environment = pm.fromEquirectangular(t).texture; t.dispose();
-  scene.environmentRotation = new THREE.Euler(0, 2.4, 0); scene.environmentIntensity = .45; });
+  scene.environmentRotation = new THREE.Euler(0, 2.4, 0); scene.environmentIntensity = .45; dirty = 3; });
 scene.environmentIntensity = .45;
 // one strong key from upper-left-behind the viewer → clear self-shadows (dial on body, button edge)
 const key = new THREE.DirectionalLight(0xfff3e6, 2.4); key.position.set(-.4, .5, .4); key.castShadow = true;
@@ -81,6 +81,7 @@ loader.load('pinch.glb', g => {
   window.__d3 = { parts: Object.keys(parts), ready: true };
 }, undefined, e => console.error('3D load fail', e));
 
+let dirty = 3;  // render only when something changes
 const SW = 7.9, SH = 4.3, SX = 35.0, SY = 83.3;
 function buildCounter() {
   const d = parts.digits; if (!d) return;
@@ -110,19 +111,22 @@ function glow(name, color, on) { parts[name] && parts[name].traverse(o => { if (
 
 const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W * renderer.getPixelRatio(), H * renderer.getPixelRatio(), { type: THREE.HalfFloatType, samples: 4 }));
 composer.addPass(new RenderPass(scene, camera));
-const ao = new GTAOPass(scene, camera, W, H); ao.updateGtaoMaterial({ radius: .006, distanceExponent: 1.5, thickness: .004, scale: 1.2, samples: 16 }); ao.blendIntensity = .8; composer.addPass(ao);
+const ao = new GTAOPass(scene, camera, W, H); ao.updateGtaoMaterial({ radius: .006, distanceExponent: 1.5, thickness: .004, scale: 1.2, samples: 8 }); ao.blendIntensity = .8; composer.addPass(ao);
 composer.addPass(new OutputPass());
 
 const proj = (obj) => { const b = new THREE.Box3().setFromObject(obj), c = b.getCenter(new THREE.Vector3()).project(camera); return [(c.x + 1) / 2 * W, (1 - c.y) / 2 * H]; };
 let blink = 0;
+let lastVol = -1, lastPressed = null, placed = false;
 renderer.setAnimationLoop(t => {
   if (!model) return;
-  const n = state.shots.length; if (n !== lastCount) { lastCount = n; drawCounter(n); }
-  tickPivot.rotation.z = DIAL_CCW - vol * (DIAL_CCW - DIAL_CW);
+  const n = state.shots.length; if (n !== lastCount) { lastCount = n; drawCounter(n); dirty = 2; }
+  if (vol !== lastVol) { lastVol = vol; tickPivot.rotation.z = DIAL_CCW - vol * (DIAL_CCW - DIAL_CW); dirty = 2; }
   const pressed = document.getElementById('hbtn3d').classList.contains('press');
-  parts.button.position.copy(btnHome); if (pressed) parts.button.position.x -= .0012;
-  if (rec) { const on = Math.floor(t / 250) % 2 === 0; if (on !== lastRec) { glow('rec_led', 0xff2020, on); lastRec = on; } }
-  else if (lastRec !== false) { glow('rec_led', 0, false); lastRec = false; }
+  if (pressed !== lastPressed) { lastPressed = pressed; parts.button.position.copy(btnHome); if (pressed) parts.button.position.x -= .0012; dirty = 2; }
+  if (rec) { const on = Math.floor(t / 250) % 2 === 0; if (on !== lastRec) { glow('rec_led', 0xff2020, on); lastRec = on; dirty = 2; } }
+  else if (lastRec !== false) { glow('rec_led', 0, false); lastRec = false; dirty = 2; }
+  if (!dirty) return;
+  dirty--;
   // keep invisible hit areas over the 3D button and dial
   const [bx, by] = proj(parts.button), [dx, dy] = proj(parts.mat_dish);
   const hb = document.getElementById('hbtn3d'), hd = document.getElementById('hdial');
