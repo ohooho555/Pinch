@@ -294,6 +294,22 @@ body.home #vHome{background:#fafafa}
 .held.d3 .devimg,.held.d3 .dialtick,.held.d3 .ctr2d,.held.d3 .recglow{display:none}
 .held .dev3d{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .held.d3 .hdial{width:40%;height:22%}.held.d3 #hbtn3d{width:9%;height:13%}
+.held .grain{position:absolute;inset:0;pointer-events:none;display:none;mix-blend-mode:overlay;opacity:.08;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  -webkit-mask:url(device_back.webp) center/100% 100% no-repeat;mask:url(device_back.webp) center/100% 100% no-repeat}
+body.grain .held.d3 .grain{display:none}
+body.grain .held .grain{display:block}
+body.grain .held .dev3d,body.grain .held .devimg{transition:filter .6s}
+body.grain[data-scene=beach] .held .dev3d,body.grain[data-scene=beach] .held .devimg{filter:saturate(.8) contrast(.94) brightness(.97)}
+body.grain[data-scene=beach] .held .grain{opacity:.12}
+body.grain[data-scene=park] .held .dev3d,body.grain[data-scene=park] .held .devimg{filter:sepia(.14) saturate(1.05)}
+body.grain[data-scene=park] .held .grain{opacity:.07}
+body.grain[data-scene=summit] .held .dev3d,body.grain[data-scene=summit] .held .devimg{filter:contrast(.95) brightness(1.02)}
+body.grain[data-scene=summit] .held .grain{opacity:.06}
+body.grain[data-scene=camp] .held .dev3d,body.grain[data-scene=camp] .held .devimg{filter:sepia(.1) saturate(.88) hue-rotate(-6deg)}
+body.grain[data-scene=camp] .held .grain{opacity:.1}
+body.grain[data-scene=city] .held .dev3d,body.grain[data-scene=city] .held .devimg{filter:saturate(.72) contrast(.92) brightness(.95)}
+body.grain[data-scene=city] .held .grain{opacity:.14}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
@@ -326,6 +342,7 @@ body.home #vHome{background:#fafafa}
       <div class="hdial" id="hdial" title="드래그 또는 휠: 볼륨"></div>
       <canvas class="ctr2d" id="ctr2d" width="1264" height="804"></canvas>
       <div class="recglow" id="recglow"></div>
+      <div class="grain"></div>
       <button class="hbtn js-btn" id="hbtn3d" aria-label="전원/채집 버튼"></button>
     </div>
 
@@ -500,7 +517,7 @@ function goScene(id){
   const img=new Image();img.onload=()=>{clearTimeout(ldT);
     if(scene){const snap=document.createElement('div');snap.className='xfade';snap.appendChild($('blurImg').cloneNode());snap.appendChild(pano.cloneNode(true));snap.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));stage.insertBefore(snap,$('ret')&&$('ret').parentNode===stage?$('ret'):null);
       requestAnimationFrame(()=>requestAnimationFrame(()=>{snap.style.opacity='0';}));setTimeout(()=>snap.remove(),XF*1000+120);}
-    clearFocus();scene=s;SRC=s.src;PW=s.w;PH=s.h;R0=s.r||185;
+    clearFocus();scene=s;SRC=s.src;document.body.dataset.scene=s.id;PW=s.w;PH=s.h;R0=s.r||185;
     $('panoImg').src=img.src;$('panoImg').width=PW;$('panoImg').height=PH;$('blurImg').src=`${sd(id)}/${id}-thumb.jpg`;
     $('placeName').textContent=s.name;checkLogo();layout();cam.x=s.start?s.start[0]:PW/2;cam.y=s.start?s.start[1]:PH*.55;clampCam();
     $('loading').classList.remove('on');ensureLive();if(ctx)loadSounds(id);
@@ -640,7 +657,7 @@ let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classL
   hd.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();setVol(vol-e.deltaY/1200);},{passive:false});})();
 ['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>initAudio(),{once:false,passive:true}));
 window.simPower=()=>power;window.simCount=()=>state.shots.length;window.simRec=()=>rec;window.simVol=()=>vol;
-document.body.classList.add('la');
+document.body.classList.add('la');if(new URLSearchParams(location.search).has('grain'))document.body.classList.add('grain');
 
 goScene(SCENES[Math.floor(Math.random()*SCENES.length)].id);
 layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);

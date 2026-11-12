@@ -7,6 +7,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
 
 const held = document.getElementById('held');
 const W = held.offsetWidth, H = held.offsetHeight;
@@ -123,22 +124,24 @@ const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W * re
 composer.addPass(new RenderPass(scene, camera));
 const ao = new GTAOPass(scene, camera, W, H); ao.updateGtaoMaterial({ radius: .006, distanceExponent: 1.5, thickness: .004, scale: 1.2, samples: 8 }); ao.blendIntensity = .62; composer.addPass(ao);
 composer.addPass(new OutputPass());
+const film = new FilmPass(0.0, false); film.enabled = false; composer.addPass(film);  // fine grain (test: ?grain)
 
 const proj = (obj) => { const b = new THREE.Box3().setFromObject(obj), c = b.getCenter(new THREE.Vector3()).project(camera); return [(c.x + 1) / 2 * W, (1 - c.y) / 2 * H]; };
 let blink = 0;
 // per-scene lighting so the device sits naturally in each background
 const LIGHT = {
-  beach:  { exp: .84,  env: .66, key: .85, kc: 0xe8edf3, rim: .28 },  // foggy overcast coast
-  summit: { exp: 1.02, env: .95, key: 1.8, kc: 0xfff4e8, rim: .55 },  // high, hazy, bright
-  park:   { exp: .95,  env: .80, key: 1.7, kc: 0xffd9b0, rim: .40 },  // warm low sun
-  camp:   { exp: .86,  env: .70, key: 1.0, kc: 0xf0f3dc, rim: .30 },  // forest shade
-  _grey:  { exp: .80,  env: .62, key: .75, kc: 0xe6ecf4, rim: .25 },  // overcast / rain
+  beach:  { exp: .84,  env: .66, key: .85, kc: 0xe8edf3, rim: .28, grain: .14 },  // foggy overcast coast
+  summit: { exp: 1.02, env: .95, key: 1.8, kc: 0xfff4e8, rim: .55, grain: .07 },  // high, hazy, bright
+  park:   { exp: .95,  env: .80, key: 1.7, kc: 0xffd9b0, rim: .40, grain: .09 },  // warm low sun
+  camp:   { exp: .86,  env: .70, key: 1.0, kc: 0xf0f3dc, rim: .30, grain: .11 },  // forest shade
+  _grey:  { exp: .80,  env: .62, key: .75, kc: 0xe6ecf4, rim: .25, grain: .16 },  // overcast / rain
 };
 let curScene = null;
 function applyLight(id) {
   const L = LIGHT[id] || LIGHT._grey;
   renderer.toneMappingExposure = L.exp; scene.environmentIntensity = L.env;
-  key.intensity = L.key; key.color.setHex(L.kc); rim.intensity = L.rim; dirty = 3;
+  key.intensity = L.key; key.color.setHex(L.kc); rim.intensity = L.rim;
+  film.enabled = document.body.classList.contains('grain'); film.uniforms.intensity.value = L.grain; dirty = 3;
 }
 let lastVol = -1, lastPressed = null, placed = false;
 renderer.setAnimationLoop(t => {
