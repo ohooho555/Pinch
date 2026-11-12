@@ -291,7 +291,11 @@ body.home #vHome{background:#fafafa}
 .fmiss.go{transform:scale(1.5);opacity:0}
 .fview{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse 62% 66% at 50% 50%,rgba(0,0,0,0) 65%,rgba(10,8,6,.22) 88%,rgba(5,4,3,.42) 100%)}
 .held #hcapDial{position:absolute;left:calc(37% - 8px) !important;right:auto !important;top:5% !important;transform:translate(-100%,-50%) !important;margin:0 !important}
+.held.d3 .devimg,.held.d3 .dialtick,.held.d3 .ctr2d,.held.d3 .recglow{display:none}
+.held .dev3d{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.held.d3 .hdial{width:40%;height:22%}.held.d3 #hbtn3d{width:9%;height:13%}
 </style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
 <body>
 
@@ -643,5 +647,6 @@ layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);
 </script>
 
 
+<script>if(new URLSearchParams(location.search).get('device')==='3d'){const m=document.createElement('script');m.type='module';m.src='device3d.js';document.body.appendChild(m);}</script>
 </body>
 </html>
