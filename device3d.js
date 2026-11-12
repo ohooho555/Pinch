@@ -35,7 +35,7 @@ const HDR = SUN ? 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloofend
                 : 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr';
 new RGBELoader().load(HDR, t => {
   t.mapping = THREE.EquirectangularReflectionMapping; scene.environment = pm.fromEquirectangular(t).texture; t.dispose();
-  scene.environmentRotation = new THREE.Euler(0, 2.4, 0); scene.environmentIntensity = SUN ? .9 : .8; dirty = 3; });
+  scene.environmentRotation = new THREE.Euler(0, 2.4, 0); applyLight(curScene); });
 scene.environmentIntensity = .8;
 // one strong key from upper-left-behind the viewer → clear self-shadows (dial on body, button edge)
 const key = new THREE.DirectionalLight(SUN ? 0xffe9cc : 0xfff3e6, SUN ? 2.0 : 1.6); key.position.set(-.4, SUN ? .75 : .5, .4); key.castShadow = true;
@@ -119,9 +119,25 @@ composer.addPass(new OutputPass());
 
 const proj = (obj) => { const b = new THREE.Box3().setFromObject(obj), c = b.getCenter(new THREE.Vector3()).project(camera); return [(c.x + 1) / 2 * W, (1 - c.y) / 2 * H]; };
 let blink = 0;
+// per-scene lighting so the device sits naturally in each background
+const LIGHT = {
+  beach:  { exp: 1.00, env: .90, key: 2.0, kc: 0xffeedd, rim: .50 },  // bright sea light
+  summit: { exp: 1.02, env: .95, key: 1.8, kc: 0xfff4e8, rim: .55 },  // high, hazy, bright
+  park:   { exp: .95,  env: .80, key: 1.7, kc: 0xffd9b0, rim: .40 },  // warm low sun
+  camp:   { exp: .86,  env: .70, key: 1.0, kc: 0xf0f3dc, rim: .30 },  // forest shade
+  _grey:  { exp: .80,  env: .62, key: .75, kc: 0xe6ecf4, rim: .25 },  // overcast / rain
+};
+let curScene = null;
+function applyLight(id) {
+  const L = LIGHT[id] || LIGHT._grey;
+  renderer.toneMappingExposure = L.exp; scene.environmentIntensity = L.env;
+  key.intensity = L.key; key.color.setHex(L.kc); rim.intensity = L.rim; dirty = 3;
+}
 let lastVol = -1, lastPressed = null, placed = false;
 renderer.setAnimationLoop(t => {
   if (!model) return;
+  const sid = window.__sceneId ? window.__sceneId() : null;
+  if (sid !== curScene) { curScene = sid; applyLight(sid); }
   const n = state.shots.length; if (n !== lastCount) { lastCount = n; drawCounter(n); dirty = 2; }
   if (vol !== lastVol) { lastVol = vol; tickPivot.rotation.z = DIAL_CCW - vol * (DIAL_CCW - DIAL_CW); dirty = 2; }
   const pressed = document.getElementById('hbtn3d').classList.contains('press');
