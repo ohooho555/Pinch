@@ -62,7 +62,7 @@ loader.load('pinch.glb', g => {
   buildCounter();
   glow('led', 0xffffff, true);
   // back view, slightly turned like the hand-held render
-  pivot.rotation.set(-0.12, Math.PI + 0.32, 0);
+  pivot.rotation.set(-0.05, Math.PI + 0.06, 0);
   const dist = (sz.y * 1.08) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
   camera.position.set(0, 0, dist); camera.lookAt(0, 0, 0);
   window.__d3 = { parts: Object.keys(parts), ready: true };
