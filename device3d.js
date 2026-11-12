@@ -121,7 +121,7 @@ const proj = (obj) => { const b = new THREE.Box3().setFromObject(obj), c = b.get
 let blink = 0;
 // per-scene lighting so the device sits naturally in each background
 const LIGHT = {
-  beach:  { exp: 1.00, env: .90, key: 2.0, kc: 0xffeedd, rim: .50 },  // bright sea light
+  beach:  { exp: .84,  env: .66, key: .85, kc: 0xe8edf3, rim: .28 },  // foggy overcast coast
   summit: { exp: 1.02, env: .95, key: 1.8, kc: 0xfff4e8, rim: .55 },  // high, hazy, bright
   park:   { exp: .95,  env: .80, key: 1.7, kc: 0xffd9b0, rim: .40 },  // warm low sun
   camp:   { exp: .86,  env: .70, key: 1.0, kc: 0xf0f3dc, rim: .30 },  // forest shade
