@@ -31,16 +31,19 @@ function studioEnv() {
 }
 scene.environment = studioEnv();
 // real studio HDRI (Poly Haven, CC0); falls back to the procedural studio if it can't load
-new RGBELoader().load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr', t => {
+const SUN = new URLSearchParams(location.search).get('light') === 'sun';
+const HDR = SUN ? 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloofendal_48d_partly_cloudy_puresky_1k.hdr'
+                : 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr';
+new RGBELoader().load(HDR, t => {
   t.mapping = THREE.EquirectangularReflectionMapping; scene.environment = pm.fromEquirectangular(t).texture; t.dispose();
-  scene.environmentRotation = new THREE.Euler(0, 2.4, 0); scene.environmentIntensity = .45; dirty = 3; });
-scene.environmentIntensity = .45;
+  scene.environmentRotation = new THREE.Euler(0, 2.4, 0); scene.environmentIntensity = SUN ? .9 : .8; dirty = 3; });
+scene.environmentIntensity = .8;
 // one strong key from upper-left-behind the viewer → clear self-shadows (dial on body, button edge)
-const key = new THREE.DirectionalLight(0xfff3e6, 2.4); key.position.set(-.4, .5, .4); key.castShadow = true;
+const key = new THREE.DirectionalLight(SUN ? 0xffe9cc : 0xfff3e6, SUN ? 2.0 : 1.6); key.position.set(-.4, SUN ? .75 : .5, .4); key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -.09, right: .09, top: .09, bottom: -.09, near: .05, far: 1.5 });
 key.shadow.bias = -.0004; key.shadow.normalBias = .0004; key.shadow.radius = 4; key.shadow.blurSamples = 12; scene.add(key);
-const rim = new THREE.DirectionalLight(0xdfe6ff, .35); rim.position.set(.6, .2, -.5); scene.add(rim);
-renderer.toneMappingExposure = .88;
+const rim = new THREE.DirectionalLight(SUN ? 0xcfe0ff : 0xdfe6ff, SUN ? .5 : .35); rim.position.set(.6, .2, -.5); scene.add(rim);
+renderer.toneMappingExposure = .98;
 const camera = new THREE.PerspectiveCamera(24, W / H, 0.005, 5);
 
 let model, parts = {}, tickPivot, btnHome = new THREE.Vector3(), ctrCanvas, ctrTex, lastCount = -1, lastRec = null;
@@ -52,7 +55,7 @@ loader.load('pinch.glb', g => {
   model.traverse(o => {
     if (o.isMesh) {
       const m = o.material, pn = o.parent ? o.parent.name : '';
-      if (m.transmission > 0 && pn !== 'mat_glass') { m.color.setStyle('#e4e3ea'); m.roughness = .42; m.ior = 1.48; m.thickness = .0055; m.transmission = .45; m.attenuationColor = new THREE.Color().setStyle('#dedee2'); m.attenuationDistance = .045; m.specularIntensity = .7; m.clearcoat = .35; m.clearcoatRoughness = .2; }
+      if (m.transmission > 0 && pn !== 'mat_glass') { m.color.setStyle('#ebeaf0'); m.roughness = .42; m.ior = 1.48; m.thickness = .0055; m.transmission = .45; m.attenuationColor = new THREE.Color().setStyle('#dedee2'); m.attenuationDistance = .045; m.specularIntensity = .7; m.clearcoat = .35; m.clearcoatRoughness = .2; }
       if (['mat_frame', 'mat_dish'].includes(pn)) m.roughness = .42;
       if (pn === 'mat_dish') m.color.setStyle('#b7b6cc');
       if (pn === 'mat_frame') { m.color.setStyle('#c6c6ca'); m.emissive = m.color.clone().multiplyScalar(.1); }
@@ -111,7 +114,7 @@ function glow(name, color, on) { parts[name] && parts[name].traverse(o => { if (
 
 const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W * renderer.getPixelRatio(), H * renderer.getPixelRatio(), { type: THREE.HalfFloatType, samples: 4 }));
 composer.addPass(new RenderPass(scene, camera));
-const ao = new GTAOPass(scene, camera, W, H); ao.updateGtaoMaterial({ radius: .006, distanceExponent: 1.5, thickness: .004, scale: 1.2, samples: 8 }); ao.blendIntensity = .8; composer.addPass(ao);
+const ao = new GTAOPass(scene, camera, W, H); ao.updateGtaoMaterial({ radius: .006, distanceExponent: 1.5, thickness: .004, scale: 1.2, samples: 8 }); ao.blendIntensity = .62; composer.addPass(ao);
 composer.addPass(new OutputPass());
 
 const proj = (obj) => { const b = new THREE.Box3().setFromObject(obj), c = b.getCenter(new THREE.Vector3()).project(camera); return [(c.x + 1) / 2 * W, (1 - c.y) / 2 * H]; };
