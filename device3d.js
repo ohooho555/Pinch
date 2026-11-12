@@ -16,6 +16,7 @@ renderer.setPixelRatio(Math.max(2, Math.min(devicePixelRatio * 1.5, 3)));  // su
 renderer.setSize(W, H);
 renderer.setClearColor(0x000000, 0);
 renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.VSMShadowMap;
 renderer.domElement.className = 'dev3d';
 held.prepend(renderer.domElement);
 
@@ -32,10 +33,14 @@ scene.environment = studioEnv();
 // real studio HDRI (Poly Haven, CC0); falls back to the procedural studio if it can't load
 new RGBELoader().load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr', t => {
   t.mapping = THREE.EquirectangularReflectionMapping; scene.environment = pm.fromEquirectangular(t).texture; t.dispose();
-  scene.environmentRotation = new THREE.Euler(0, 2.4, 0); scene.environmentIntensity = 1.15; });
-const key = new THREE.DirectionalLight(0xfff6ee, .9); key.position.set(-.45, .7, -.6); scene.add(key);
-const rim = new THREE.DirectionalLight(0xe8eeff, .6); rim.position.set(.6, .3, .5); scene.add(rim);
-renderer.toneMappingExposure = 1.08;
+  scene.environmentRotation = new THREE.Euler(0, 2.4, 0); scene.environmentIntensity = .45; });
+scene.environmentIntensity = .45;
+// one strong key from upper-left-behind the viewer → clear self-shadows (dial on body, button edge)
+const key = new THREE.DirectionalLight(0xfff3e6, 2.4); key.position.set(-.4, .5, .4); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -.09, right: .09, top: .09, bottom: -.09, near: .05, far: 1.5 });
+key.shadow.bias = -.0004; key.shadow.normalBias = .0004; key.shadow.radius = 4; key.shadow.blurSamples = 12; scene.add(key);
+const rim = new THREE.DirectionalLight(0xdfe6ff, .35); rim.position.set(.6, .2, -.5); scene.add(rim);
+renderer.toneMappingExposure = .88;
 const camera = new THREE.PerspectiveCamera(24, W / H, 0.005, 5);
 
 let model, parts = {}, tickPivot, btnHome = new THREE.Vector3(), ctrCanvas, ctrTex, lastCount = -1, lastRec = null;
@@ -47,7 +52,7 @@ loader.load('pinch.glb', g => {
   model.traverse(o => {
     if (o.isMesh) {
       const m = o.material, pn = o.parent ? o.parent.name : '';
-      if (m.transmission > 0 && pn !== 'mat_glass') { m.color.setStyle('#f2f1f6'); m.roughness = .42; m.ior = 1.48; m.thickness = .0055; m.transmission = .45; m.attenuationColor = new THREE.Color().setStyle('#dedee2'); m.attenuationDistance = .045; m.specularIntensity = .7; m.clearcoat = .35; m.clearcoatRoughness = .2; }
+      if (m.transmission > 0 && pn !== 'mat_glass') { m.color.setStyle('#e4e3ea'); m.roughness = .42; m.ior = 1.48; m.thickness = .0055; m.transmission = .45; m.attenuationColor = new THREE.Color().setStyle('#dedee2'); m.attenuationDistance = .045; m.specularIntensity = .7; m.clearcoat = .35; m.clearcoatRoughness = .2; }
       if (['mat_frame', 'mat_dish'].includes(pn)) m.roughness = .42;
       if (pn === 'mat_dish') m.color.setStyle('#b7b6cc');
       if (pn === 'mat_frame') { m.color.setStyle('#c6c6ca'); m.emissive = m.color.clone().multiplyScalar(.1); }
@@ -56,6 +61,7 @@ loader.load('pinch.glb', g => {
       if (pn === 'mat_black') m.roughness = .4;
       if (pn === 'mat_glass') { m.transmission = 1; m.roughness = .03; m.thickness = .0005; m.ior = 1.5; }
     }
+    if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
     if (o.name) parts[o.name] = o;
   });
   const pivot = new THREE.Group(); pivot.add(model); scene.add(pivot);
@@ -104,7 +110,7 @@ function glow(name, color, on) { parts[name] && parts[name].traverse(o => { if (
 
 const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W * renderer.getPixelRatio(), H * renderer.getPixelRatio(), { type: THREE.HalfFloatType, samples: 4 }));
 composer.addPass(new RenderPass(scene, camera));
-const ao = new GTAOPass(scene, camera, W, H); ao.updateGtaoMaterial({ radius: .006, distanceExponent: 1.5, thickness: .004, scale: 1.2, samples: 16 }); ao.blendIntensity = .45; composer.addPass(ao);
+const ao = new GTAOPass(scene, camera, W, H); ao.updateGtaoMaterial({ radius: .006, distanceExponent: 1.5, thickness: .004, scale: 1.2, samples: 16 }); ao.blendIntensity = .8; composer.addPass(ao);
 composer.addPass(new OutputPass());
 
 const proj = (obj) => { const b = new THREE.Box3().setFromObject(obj), c = b.getCenter(new THREE.Vector3()).project(camera); return [(c.x + 1) / 2 * W, (1 - c.y) / 2 * H]; };
