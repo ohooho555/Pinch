@@ -648,6 +648,6 @@ layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);
 </script>
 
 
-<script>if(new URLSearchParams(location.search).get('device')==='3d'){const m=document.createElement('script');m.type='module';m.src='device3d.js';document.body.appendChild(m);}</script>
+<script>if(new URLSearchParams(location.search).get('device')!=='img'){const m=document.createElement('script');m.type='module';m.src='device3d.js';document.body.appendChild(m);}</script>
 </body>
 </html>

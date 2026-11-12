@@ -9,7 +9,6 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 const held = document.getElementById('held');
-held.classList.add('d3');
 const W = held.offsetWidth, H = held.offsetHeight;
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, premultipliedAlpha: false });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -31,7 +30,7 @@ function studioEnv() {
 }
 scene.environment = studioEnv();
 // real studio HDRI (Poly Haven, CC0); falls back to the procedural studio if it can't load
-const SUN = new URLSearchParams(location.search).get('light') === 'sun';
+const SUN = new URLSearchParams(location.search).get('light') !== 'studio';  // natural light by default
 const HDR = SUN ? 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloofendal_48d_partly_cloudy_puresky_1k.hdr'
                 : 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr';
 new RGBELoader().load(HDR, t => {
@@ -81,6 +80,7 @@ loader.load('pinch.glb', g => {
   pivot.rotation.set(-0.05, Math.PI + 0.06, 0);
   const dist = (sz.y * 1.08) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
   camera.position.set(0, 0, dist); camera.lookAt(0, 0, 0);
+  held.classList.add('d3');
   window.__d3 = { parts: Object.keys(parts), ready: true };
 }, undefined, e => console.error('3D load fail', e));
 
