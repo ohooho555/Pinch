@@ -46,7 +46,8 @@ renderer.toneMappingExposure = .98;
 const camera = new THREE.PerspectiveCamera(24, W / H, 0.005, 5);
 
 let model, parts = {}, tickPivot, btnHome = new THREE.Vector3(), ctrCanvas, ctrTex, lastCount = -1, lastRec = null;
-const DIAL_CCW = 1.78, DIAL_CW = -1.13;
+// tick rests at 10:30 seen from the front; limit = 12 o'clock → 3 o'clock seen from the back (front: 12 → 9)
+const DIAL_CCW = -Math.PI / 4, DIAL_CW = Math.PI / 4;
 
 const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
 loader.load('pinch.glb', g => {
@@ -81,7 +82,13 @@ loader.load('pinch.glb', g => {
   const dist = (sz.y * 1.08) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
   camera.position.set(0, 0, dist); camera.lookAt(0, 0, 0);
   held.classList.add('d3');
-  window.__d3 = { parts: Object.keys(parts), ready: true };
+  window.__d3 = { parts: Object.keys(parts), ready: true,
+    tickAngle() { const r = tickPivot.rotation.z; tickPivot.rotation.z = 0; tickPivot.updateMatrixWorld(true);
+      const c = new THREE.Box3().setFromObject(parts.tick).getCenter(new THREE.Vector3()); tickPivot.worldToLocal(c); tickPivot.rotation.z = r;
+      return { x: c.x, y: c.y, z: c.z, deg: Math.atan2(-c.x, c.y) * 180 / Math.PI }; },
+    axis() { const v = new THREE.Vector3(0,0,1).applyQuaternion(model.getWorldQuaternion(new THREE.Quaternion())); return [v.x, v.y, v.z]; },
+    dishFront() { const m = new THREE.Box3().setFromObject(parts.mic), d = new THREE.Box3().setFromObject(parts.mat_dish); model.updateMatrixWorld(true);
+      const a = m.getCenter(new THREE.Vector3()), b = d.getCenter(new THREE.Vector3()); model.worldToLocal(a); model.worldToLocal(b); return [a.z, b.z]; } };
 }, undefined, e => console.error('3D load fail', e));
 
 let dirty = 3;  // render only when something changes
