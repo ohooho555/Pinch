@@ -312,6 +312,7 @@ body.grain[data-scene=city] .held .dev3d,body.grain[data-scene=city] .held .devi
 body.grain[data-scene=city] .held .grain{opacity:.14}
 .held .hintcap{position:absolute;right:auto;transform:translate(-100%,-50%);opacity:0;transition:opacity .5s;margin:0}
 .held .hintcap.on{opacity:1}
+.held .hintcap.T{transform:translate(-50%,-100%)}
 .held.d3wait .devimg,.held.d3wait .dialtick,.held.d3wait .ctr2d,.held.d3wait .recglow,.held.d3wait .grain{visibility:hidden}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
@@ -640,17 +641,23 @@ function setMode(m){const from=mode;mode=m;closeMenu();$('fillBtn').textContent=
   setMaster();if(m==='field')layout();}
 $('mField').addEventListener('click',()=>setMode('field'));$('mHome').addEventListener('click',()=>setMode('home'));
 let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms);}
-(function(){const cv=document.getElementById('ctr2d');if(!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height,SW=7.9,SH=7.9*804/1264,SX=35.0,SY=83.3;
-  const px=mm=>mm/SW*W,X=xm=>W/2+px(SX-xm)*1.0,Y=ym=>H/2+px(SY-ym)*1.12;let last='';
-  function draw(){const P=power,N=state.shots.length,k=P+'|'+N;if(k!==last){last=k;
-    g.fillStyle='#262628';g.fillRect(0,0,W,H);
-    const nums=[N+1,N,N-1],xs=[31.6,35.0,38.3],ys=[83.55,83.05,82.5];
-    g.fillStyle=P?'#f2f2f2':'rgba(242,242,242,.13)';g.shadowColor='rgba(255,255,255,.45)';g.shadowBlur=P?14:0;
-    g.font=`500 ${Math.round(px(2.05))}px Jost, Futura, "Avenir Next", "Century Gothic", Arial, sans-serif`;g.textAlign='center';g.textBaseline='middle';
-    nums.forEach((n,i)=>{if(n<0||n>27)return;g.save();g.translate(X(xs[i]),Y(ys[i]));g.rotate(Math.PI/2);g.fillText(String(n).padStart(2,'0'),0,0);g.restore();});
-    [33.1,36.8].forEach(xm=>{g.beginPath();g.arc(X(xm),Y(83.0),px(.2),0,Math.PI*2);g.fill();});}
+/* film-counter drum: numbers sit on a small cylinder that rolls right → left (seen from the back) */
+window.pinchDrum=function(g,W,H,o){const SW=7.9,SX=35.0,SY=o.sy||83.05,px=mm=>mm/SW*W,X=xm=>W/2+px(SX-xm)*(o.kx||1),Y=ym=>H/2+px((o.cy||83.3)-ym)*(o.ky||1);
+  g.fillStyle=o.bg;g.fillRect(0,0,W,H);const R=5.5,STEP=38*Math.PI/180,ph=o.phase;
+  g.fillStyle=o.on?'#f2f2f2':'rgba(242,242,242,.13)';g.font=`500 ${Math.round(px(o.fs||2.05))}px Jost, Futura, "Avenir Next", "Century Gothic", Arial, sans-serif`;g.textAlign='center';g.textBaseline='middle';
+  const item=(off,fn)=>{const th=off*STEP;if(Math.abs(th)>1.45)return;const c=Math.cos(th);g.save();g.globalAlpha=Math.max(0,Math.min(1,(c-.12)/.5));
+    g.translate(X(SX-R*Math.sin(th)),Y(SY+.52*off));g.scale(Math.max(.05,c),1);fn();g.restore();};
+  g.shadowColor='rgba(255,255,255,.45)';g.shadowBlur=o.on?14:0;
+  for(let n=Math.floor(ph)-3;n<=Math.ceil(ph)+3;n++){if(n<0||n>(o.max||27))continue;item(n-ph,()=>{g.rotate(Math.PI/2);g.fillText(String(n).padStart(2,'0'),0,0);});}
+  g.shadowBlur=0;for(let h=Math.floor(ph)-3;h<=Math.ceil(ph)+3;h++){item(h+.5-ph,()=>{g.beginPath();g.arc(0,0,px(.2),0,Math.PI*2);g.fill();});}
+};
+window.drumEase={v:null,step(target,dt){if(this.v===null)this.v=target;const d=target-this.v;if(Math.abs(d)<.002){this.v=target;return false;}this.v+=d*Math.min(1,dt/170);return true;}};
+(function(){const cv=document.getElementById('ctr2d');if(!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height;let lt=performance.now(),last='';
+  const e={v:null,step:drumEase.step};
+  function draw(t){const dt=t-lt;lt=t;const moving=e.step(state.shots.length,dt),k=power+'|'+e.v;
+    if(moving||k!==last){last=k;pinchDrum(g,W,H,{bg:'#262628',on:power,phase:e.v,ky:1.12,max:MAX});}
     document.getElementById('recglow').classList.toggle('on',!!rec);requestAnimationFrame(draw);}
-  (document.fonts?document.fonts.load('500 100px Jost'):Promise.resolve()).finally(()=>{last='';});draw();})();
+  (document.fonts?document.fonts.load('500 100px Jost'):Promise.resolve()).finally(()=>{last='';});requestAnimationFrame(draw);})();
 (function(){const tk=document.getElementById('dialtick'),hd=document.getElementById('hdial');if(!tk)return;
   const A0=43,AMIN=0,AMAX=90;   // tick angle in the export; limit 12 → 3 o'clock seen from the back (deg, clockwise)
   let lastV=-1;(function loop(){if(vol!==lastV){lastV=vol;tk.style.transform=`rotate(${AMIN+vol*(AMAX-AMIN)-A0}deg)`;}requestAnimationFrame(loop);})();
@@ -667,10 +674,10 @@ document.body.classList.add('la');if(!new URLSearchParams(location.search).has('
   const want3d=new URLSearchParams(location.search).get('device')!=='img';
   if(want3d&&!(window.__d3&&window.__d3.ready)&&!hints.waited){hints.n=(hints.n||0)+1;if(hints.n<120){setTimeout(hints,100);return;}}
   hints.waited=true;
-  [['hbtn3d','눌러서 채집',.5],['hdial','돌려서 음량 조절',.5]].forEach(([id,txt,fy])=>{const t=$(id);if(!t)return;
-    const c=document.createElement('div');c.className='hcap hintcap';c.textContent=txt;held.appendChild(c);
-    const t0=performance.now();(function pos(){c.style.left=(t.offsetLeft-10)+'px';c.style.top=(t.offsetTop+t.offsetHeight*fy)+'px';if(performance.now()-t0<4200)requestAnimationFrame(pos);})();
-    setTimeout(()=>c.classList.add('on'),900);setTimeout(()=>c.classList.remove('on'),3900);setTimeout(()=>c.remove(),4600);});})();
+  [['hbtn3d','눌러서 채집',.5,0,'L'],['hdial','돌려서 음량 조절',0,.5,'T']].forEach(([id,txt,fy,fx,side])=>{const t=$(id);if(!t)return;
+    const c=document.createElement('div');c.className='hcap hintcap '+side;c.textContent=txt;held.appendChild(c);
+    const t0=performance.now();(function pos(){c.style.left=(t.offsetLeft+t.offsetWidth*fx-(side==='L'?6:0))+'px';c.style.top=(t.offsetTop+t.offsetHeight*fy-(side==='T'?6:0))+'px';if(performance.now()-t0<4200)requestAnimationFrame(pos);})();
+    setTimeout(()=>c.classList.add('on'),900);setTimeout(()=>c.classList.remove('on'),3900+(window.__hintHold||0));setTimeout(()=>c.remove(),4600+(window.__hintHold||0));});})();
 
 goScene(SCENES[Math.floor(Math.random()*SCENES.length)].id);
 layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);

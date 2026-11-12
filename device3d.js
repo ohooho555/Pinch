@@ -105,17 +105,10 @@ function buildCounter() {
   mesh.position.set(c.x, c.y + (SY - 83.0) / 1000, bmin.z - .00005); mesh.rotation.y = Math.PI;
   model.add(mesh);
 }
-function drawCounter(count) {
+const drum = { v: null, step: window.drumEase.step };
+function drawCounter(phase) {
   if (!ctrCanvas) return;
-  const g = ctrCanvas.getContext('2d'), W = ctrCanvas.width, H = ctrCanvas.height;
-  const px = mm => mm / SW * W, X = xm => W / 2 + px(SX - xm), Y = ym => H / 2 + px(SY - ym);
-  g.fillStyle = '#1b1b1d'; g.fillRect(0, 0, W, H);
-  const nums = [count + 1, count, count - 1].map(n => (n >= 0 && n <= 27) ? String(n).padStart(2, '0') : '');
-  g.fillStyle = '#f2f2f2'; g.shadowColor = 'rgba(255,255,255,.45)'; g.shadowBlur = 14;
-  g.font = `500 ${Math.round(px(1.8))}px Jost, Futura, "Avenir Next", Arial, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
-  const xs = [31.6, 35.0, 38.3], ys = [83.55, 83.05, 82.5];
-  nums.forEach((t, k) => { g.save(); g.translate(X(xs[k]), Y(ys[k])); g.rotate(Math.PI / 2); g.fillText(t, 0, 0); g.restore(); });
-  [33.1, 36.8].forEach(xm => { g.beginPath(); g.arc(X(xm), Y(83.0), px(.2), 0, Math.PI * 2); g.fill(); });
+  window.pinchDrum(ctrCanvas.getContext('2d'), ctrCanvas.width, ctrCanvas.height, { bg: '#1b1b1d', on: true, phase, fs: 1.8, cy: SY, max: 27 });
   ctrTex.needsUpdate = true;
 }
 function glow(name, color, on) { parts[name] && parts[name].traverse(o => { if (o.isMesh) { o.material.emissive.set(on ? color : 0x000000); o.material.emissiveIntensity = on ? 2.2 : 0; } }); }
@@ -148,7 +141,8 @@ renderer.setAnimationLoop(t => {
   if (!model) return;
   const sid = window.__sceneId ? window.__sceneId() : null;
   if (sid !== curScene) { curScene = sid; applyLight(sid); }
-  const n = state.shots.length; if (n !== lastCount) { lastCount = n; drawCounter(n); dirty = 2; }
+  const dtc = t - (window.__lt || t); window.__lt = t;
+  if (drum.step(state.shots.length, dtc) || drum.v !== lastCount) { lastCount = drum.v; drawCounter(drum.v); dirty = 2; }
   if (vol !== lastVol) { lastVol = vol; tickPivot.rotation.z = DIAL_CCW - vol * (DIAL_CCW - DIAL_CW); dirty = 2; }
   const pressed = document.getElementById('hbtn3d').classList.contains('press');
   if (pressed !== lastPressed) { lastPressed = pressed; parts.button.position.copy(btnHome); if (pressed) parts.button.position.x -= .0012; dirty = 2; }
