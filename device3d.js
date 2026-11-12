@@ -108,7 +108,7 @@ function buildCounter() {
 const drum = { v: null, step: window.drumEase.step };
 function drawCounter(phase) {
   if (!ctrCanvas) return;
-  window.pinchDrum(ctrCanvas.getContext('2d'), ctrCanvas.width, ctrCanvas.height, { bg: '#1b1b1d', on: true, phase, fs: 1.8, cy: SY, max: 27 });
+  window.pinchDrum(ctrCanvas.getContext('2d'), ctrCanvas.width, ctrCanvas.height, { bg: '#1b1b1d', on: true, phase, max: 27 });
   ctrTex.needsUpdate = true;
 }
 function glow(name, color, on) { parts[name] && parts[name].traverse(o => { if (o.isMesh) { o.material.emissive.set(on ? color : 0x000000); o.material.emissiveIntensity = on ? 2.2 : 0; } }); }
