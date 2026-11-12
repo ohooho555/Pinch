@@ -7,7 +7,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
 const held = document.getElementById('held');
 const W = held.offsetWidth, H = held.offsetHeight;
@@ -93,6 +93,7 @@ loader.load('pinch.glb', g => {
 }, undefined, e => { console.error('3D load fail', e); held.classList.remove('d3wait'); });
 
 let dirty = 3;  // render only when something changes
+let ctrMesh = null;
 const SW = 7.9, SH = 4.3, SX = 35.0, SY = 83.3;
 function buildCounter() {
   const d = parts.digits; if (!d) return;
@@ -101,7 +102,7 @@ function buildCounter() {
   d.visible = false;
   ctrCanvas = document.createElement('canvas'); ctrCanvas.width = 1264; ctrCanvas.height = Math.round(1264 * SH / SW);
   ctrTex = new THREE.CanvasTexture(ctrCanvas); ctrTex.colorSpace = THREE.SRGBColorSpace; ctrTex.anisotropy = 8;
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(SW / 1000, SH / 1000), new THREE.MeshBasicMaterial({ map: ctrTex, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+  const mesh = ctrMesh = new THREE.Mesh(new THREE.PlaneGeometry(SW / 1000, SH / 1000), new THREE.MeshBasicMaterial({ map: ctrTex, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2 }));
   mesh.position.set(c.x, c.y + (SY - 83.0) / 1000, bmin.z - .00005); mesh.rotation.y = Math.PI;
   model.add(mesh);
 }
@@ -117,7 +118,25 @@ const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W * re
 composer.addPass(new RenderPass(scene, camera));
 const ao = new GTAOPass(scene, camera, W, H); ao.updateGtaoMaterial({ radius: .006, distanceExponent: 1.5, thickness: .004, scale: 1.2, samples: 8 }); ao.blendIntensity = .62; composer.addPass(ao);
 composer.addPass(new OutputPass());
-const film = new FilmPass(0.0, false); film.enabled = false; composer.addPass(film);  // fine grain (off with ?nograin)
+// fine film grain on the device, except inside the counter window (kept crisp). off with ?nograin
+const film = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, time: { value: 0 }, intensity: { value: 0 }, q: { value: [new THREE.Vector2(), new THREE.Vector2(), new THREE.Vector2(), new THREE.Vector2()] } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `#include <common>
+    uniform sampler2D tDiffuse; uniform float time, intensity; uniform vec2 q[4]; varying vec2 vUv;
+    float side(vec2 a, vec2 b, vec2 p){ return (b.x-a.x)*(p.y-a.y)-(b.y-a.y)*(p.x-a.x); }
+    void main(){ vec4 base = texture2D(tDiffuse, vUv);
+      float s0=side(q[0],q[1],vUv), s1=side(q[1],q[2],vUv), s2=side(q[2],q[3],vUv), s3=side(q[3],q[0],vUv);
+      bool inside = (s0>=0.&&s1>=0.&&s2>=0.&&s3>=0.)||(s0<=0.&&s1<=0.&&s2<=0.&&s3<=0.);
+      float n = rand(fract(vUv + time)); vec3 c = base.rgb + base.rgb * clamp(.1 + n, 0., 1.);
+      gl_FragColor = vec4(inside ? base.rgb : mix(base.rgb, c, intensity), base.a); }` });
+film.enabled = false; composer.addPass(film);
+function updateCounterMask() {
+  if (!ctrMesh) return; ctrMesh.updateMatrixWorld(true);
+  [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy], i) => {
+    const v = new THREE.Vector3(sx * SW / 2000 * 1.04, sy * SH / 2000 * 1.04, 0).applyMatrix4(ctrMesh.matrixWorld).project(camera);
+    film.uniforms.q.value[i].set((v.x + 1) / 2, (v.y + 1) / 2); });
+}
 
 const proj = (obj) => { const b = new THREE.Box3().setFromObject(obj), c = b.getCenter(new THREE.Vector3()).project(camera); return [(c.x + 1) / 2 * W, (1 - c.y) / 2 * H]; };
 let blink = 0;
@@ -155,5 +174,6 @@ renderer.setAnimationLoop(t => {
   const hb = document.getElementById('hbtn3d'), hd = document.getElementById('hdial');
   hb.style.left = (bx - hb.offsetWidth / 2) + 'px'; hb.style.top = (by - hb.offsetHeight / 2) + 'px';
   hd.style.left = (dx - hd.offsetWidth / 2) + 'px'; hd.style.top = (dy - hd.offsetHeight / 2) + 'px';
+  if (film.enabled) { updateCounterMask(); film.uniforms.time.value = (t % 10000) / 1000; }
   composer.render();
 });
