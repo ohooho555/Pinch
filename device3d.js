@@ -82,7 +82,7 @@ loader.load('pinch.glb', g => {
   pivot.rotation.set(-0.05, Math.PI + 0.06, 0);
   const dist = (sz.y * 1.08) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
   camera.position.set(0, 0, dist); camera.lookAt(0, 0, 0);
-  held.classList.add('d3');
+  held.classList.add('d3'); held.classList.remove('d3wait');
   window.__d3 = { parts: Object.keys(parts), ready: true,
     tickAngle() { const r = tickPivot.rotation.z; tickPivot.rotation.z = 0; tickPivot.updateMatrixWorld(true);
       const c = new THREE.Box3().setFromObject(parts.tick).getCenter(new THREE.Vector3()); tickPivot.worldToLocal(c); tickPivot.rotation.z = r;
@@ -90,7 +90,7 @@ loader.load('pinch.glb', g => {
     axis() { const v = new THREE.Vector3(0,0,1).applyQuaternion(model.getWorldQuaternion(new THREE.Quaternion())); return [v.x, v.y, v.z]; },
     dishFront() { const m = new THREE.Box3().setFromObject(parts.mic), d = new THREE.Box3().setFromObject(parts.mat_dish); model.updateMatrixWorld(true);
       const a = m.getCenter(new THREE.Vector3()), b = d.getCenter(new THREE.Vector3()); model.worldToLocal(a); model.worldToLocal(b); return [a.z, b.z]; } };
-}, undefined, e => console.error('3D load fail', e));
+}, undefined, e => { console.error('3D load fail', e); held.classList.remove('d3wait'); });
 
 let dirty = 3;  // render only when something changes
 const SW = 7.9, SH = 4.3, SX = 35.0, SY = 83.3;
@@ -110,7 +110,7 @@ function drawCounter(count) {
   const g = ctrCanvas.getContext('2d'), W = ctrCanvas.width, H = ctrCanvas.height;
   const px = mm => mm / SW * W, X = xm => W / 2 + px(SX - xm), Y = ym => H / 2 + px(SY - ym);
   g.fillStyle = '#1b1b1d'; g.fillRect(0, 0, W, H);
-  const nums = [count + 1, count, count - 1].map(n => (n >= 0 && n <= 28) ? String(n).padStart(2, '0') : '');
+  const nums = [count + 1, count, count - 1].map(n => (n >= 0 && n <= 27) ? String(n).padStart(2, '0') : '');
   g.fillStyle = '#f2f2f2'; g.shadowColor = 'rgba(255,255,255,.45)'; g.shadowBlur = 14;
   g.font = `500 ${Math.round(px(1.8))}px Jost, Futura, "Avenir Next", Arial, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
   const xs = [31.6, 35.0, 38.3], ys = [83.55, 83.05, 82.5];
