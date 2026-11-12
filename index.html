@@ -671,14 +671,18 @@ window.drumEase={v:null,step(target,dt){if(this.v===null)this.v=target;const d=t
 window.simPower=()=>power;window.simCount=()=>state.shots.length;window.simRec=()=>rec;window.simVol=()=>vol;
 document.body.classList.add('la');if(!new URLSearchParams(location.search).has('nograin'))document.body.classList.add('grain');
 /* first-visit hint on the device button: shows for 3 s, then fades */
-(function hints(){const held=$('held');if(!held)return;
-  const want3d=new URLSearchParams(location.search).get('device')!=='img';
-  if(want3d&&!(window.__d3&&window.__d3.ready)&&!hints.waited){hints.n=(hints.n||0)+1;if(hints.n<120){setTimeout(hints,100);return;}}
-  hints.waited=true;
-  [['hbtn3d','눌러서 채집',.5,0,'L'],['hdial','돌려서 음량 조절',0,.5,'T']].forEach(([id,txt,fy,fx,side])=>{const t=$(id);if(!t)return;
-    const c=document.createElement('div');c.className='hcap hintcap '+side;c.textContent=txt;held.appendChild(c);
-    const t0=performance.now();(function pos(){c.style.left=(t.offsetLeft+t.offsetWidth*fx-(side==='L'?6:0))+'px';c.style.top=(t.offsetTop+t.offsetHeight*fy-(side==='T'?6:0))+'px';if(performance.now()-t0<4200)requestAnimationFrame(pos);})();
-    setTimeout(()=>c.classList.add('on'),900);setTimeout(()=>c.classList.remove('on'),3900+(window.__hintHold||0));setTimeout(()=>c.remove(),4600+(window.__hintHold||0));});})();
+/* device hints: shown for 3 s on entry; after 5 min without any input they come back and stay until the next input */
+(function(){const held=$('held');if(!held)return;const SPEC=[['hbtn3d','눌러서 채집',.5,0,'L'],['hdial','돌려서 음량 조절',0,.5,'T']];let caps=[],raf=0,hideT=0;
+  function place(){caps.forEach(({c,t,fy,fx,side})=>{c.style.left=(t.offsetLeft+t.offsetWidth*fx-(side==='L'?6:0))+'px';c.style.top=(t.offsetTop+t.offsetHeight*fy-(side==='T'?6:0))+'px';});raf=requestAnimationFrame(place);}
+  function show(ms){clearTimeout(hideT);if(!caps.length){caps=SPEC.map(([id,txt,fy,fx,side])=>{const t=$(id);if(!t)return null;const c=document.createElement('div');c.className='hcap hintcap '+side;c.textContent=txt;held.appendChild(c);return{c,t,fy,fx,side};}).filter(Boolean);
+      cancelAnimationFrame(raf);place();requestAnimationFrame(()=>requestAnimationFrame(()=>caps.forEach(x=>x.c.classList.add('on'))));}
+    if(ms)hideT=setTimeout(hide,ms);}
+  function hide(){clearTimeout(hideT);const old=caps;caps=[];old.forEach(x=>x.c.classList.remove('on'));setTimeout(()=>{old.forEach(x=>x.c.remove());if(!caps.length)cancelAnimationFrame(raf);},600);}
+  const IDLE=window.__idleMs||5*60*1000;let idleT=0,persistent=false;
+  function arm(){clearTimeout(idleT);idleT=setTimeout(()=>{persistent=true;show(0);},IDLE);}
+  ['pointermove','pointerdown','keydown','wheel','touchstart'].forEach(ev=>addEventListener(ev,()=>{if(persistent){persistent=false;hide();}arm();},{passive:true}));
+  const want3d=new URLSearchParams(location.search).get('device')!=='img';let n=0;
+  (function start(){if(want3d&&!(window.__d3&&window.__d3.ready)&&n++<120){setTimeout(start,100);return;}setTimeout(()=>show(3000+(window.__hintHold||0)),900);arm();})();})();
 
 goScene(SCENES[Math.floor(Math.random()*SCENES.length)].id);
 layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);
