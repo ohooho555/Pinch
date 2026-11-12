@@ -661,9 +661,14 @@ let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classL
 window.simPower=()=>power;window.simCount=()=>state.shots.length;window.simRec=()=>rec;window.simVol=()=>vol;
 document.body.classList.add('la');if(!new URLSearchParams(location.search).has('nograin'))document.body.classList.add('grain');
 /* first-visit hint on the device button: shows for 3 s, then fades */
-(function(){const held=$('held'),hb=$('hbtn3d');if(!held||!hb)return;const c=document.createElement('div');c.className='hcap hintcap';c.textContent='눌러서 채집';held.appendChild(c);
-  const t0=performance.now();(function pos(){c.style.left=(hb.offsetLeft-10)+'px';c.style.top=(hb.offsetTop+hb.offsetHeight/2)+'px';if(performance.now()-t0<4200)requestAnimationFrame(pos);})();
-  setTimeout(()=>c.classList.add('on'),900);setTimeout(()=>c.classList.remove('on'),3900);setTimeout(()=>c.remove(),4600);})();
+(function hints(){const held=$('held');if(!held)return;
+  const want3d=new URLSearchParams(location.search).get('device')!=='img';
+  if(want3d&&!(window.__d3&&window.__d3.ready)&&!hints.waited){hints.n=(hints.n||0)+1;if(hints.n<120){setTimeout(hints,100);return;}}
+  hints.waited=true;
+  [['hbtn3d','눌러서 채집',.5],['hdial','돌려서 음량 조절',.5]].forEach(([id,txt,fy])=>{const t=$(id);if(!t)return;
+    const c=document.createElement('div');c.className='hcap hintcap';c.textContent=txt;held.appendChild(c);
+    const t0=performance.now();(function pos(){c.style.left=(t.offsetLeft-10)+'px';c.style.top=(t.offsetTop+t.offsetHeight*fy)+'px';if(performance.now()-t0<4200)requestAnimationFrame(pos);})();
+    setTimeout(()=>c.classList.add('on'),900);setTimeout(()=>c.classList.remove('on'),3900);setTimeout(()=>c.remove(),4600);});})();
 
 goScene(SCENES[Math.floor(Math.random()*SCENES.length)].id);
 layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);
