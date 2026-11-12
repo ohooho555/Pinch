@@ -310,6 +310,8 @@ body.grain[data-scene=camp] .held .dev3d,body.grain[data-scene=camp] .held .devi
 body.grain[data-scene=camp] .held .grain{opacity:.1}
 body.grain[data-scene=city] .held .dev3d,body.grain[data-scene=city] .held .devimg{filter:saturate(.72) contrast(.92) brightness(.95)}
 body.grain[data-scene=city] .held .grain{opacity:.14}
+.held .hintcap{position:absolute;right:auto;transform:translate(-100%,-50%);opacity:0;transition:opacity .5s;margin:0}
+.held .hintcap.on{opacity:1}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
@@ -657,7 +659,11 @@ let tt;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.classL
   hd.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();setVol(vol-e.deltaY/1200);},{passive:false});})();
 ['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>initAudio(),{once:false,passive:true}));
 window.simPower=()=>power;window.simCount=()=>state.shots.length;window.simRec=()=>rec;window.simVol=()=>vol;
-document.body.classList.add('la');if(new URLSearchParams(location.search).has('grain'))document.body.classList.add('grain');
+document.body.classList.add('la');if(!new URLSearchParams(location.search).has('nograin'))document.body.classList.add('grain');
+/* first-visit hint on the device button: shows for 3 s, then fades */
+(function(){const held=$('held'),hb=$('hbtn3d');if(!held||!hb)return;const c=document.createElement('div');c.className='hcap hintcap';c.textContent='눌러서 채집';held.appendChild(c);
+  const t0=performance.now();(function pos(){c.style.left=(hb.offsetLeft-10)+'px';c.style.top=(hb.offsetTop+hb.offsetHeight/2)+'px';if(performance.now()-t0<4200)requestAnimationFrame(pos);})();
+  setTimeout(()=>c.classList.add('on'),900);setTimeout(()=>c.classList.remove('on'),3900);setTimeout(()=>c.remove(),4600);})();
 
 goScene(SCENES[Math.floor(Math.random()*SCENES.length)].id);
 layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);

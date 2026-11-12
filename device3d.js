@@ -124,7 +124,7 @@ const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W * re
 composer.addPass(new RenderPass(scene, camera));
 const ao = new GTAOPass(scene, camera, W, H); ao.updateGtaoMaterial({ radius: .006, distanceExponent: 1.5, thickness: .004, scale: 1.2, samples: 8 }); ao.blendIntensity = .62; composer.addPass(ao);
 composer.addPass(new OutputPass());
-const film = new FilmPass(0.0, false); film.enabled = false; composer.addPass(film);  // fine grain (test: ?grain)
+const film = new FilmPass(0.0, false); film.enabled = false; composer.addPass(film);  // fine grain (off with ?nograin)
 
 const proj = (obj) => { const b = new THREE.Box3().setFromObject(obj), c = b.getCenter(new THREE.Vector3()).project(camera); return [(c.x + 1) / 2 * W, (1 - c.y) / 2 * H]; };
 let blink = 0;
