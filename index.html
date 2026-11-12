@@ -304,6 +304,7 @@ body.grain[data-scene=beach] .held .dev3d,body.grain[data-scene=beach] .held .de
 body.grain[data-scene=beach] .held .grain{opacity:.12}
 body.grain[data-scene=park] .held .dev3d,body.grain[data-scene=park] .held .devimg{filter:sepia(.14) saturate(1.05)}
 body.grain[data-scene=park] .held .grain{opacity:.07}
+body.parktone.grain[data-scene=park] .held .dev3d,body.parktone.grain[data-scene=park] .held .devimg{filter:sepia(.04) saturate(.7) brightness(.97)}
 body.grain[data-scene=summit] .held .dev3d,body.grain[data-scene=summit] .held .devimg{filter:contrast(.95) brightness(1.02)}
 body.grain[data-scene=summit] .held .grain{opacity:.06}
 body.grain[data-scene=camp] .held .dev3d,body.grain[data-scene=camp] .held .devimg{filter:sepia(.1) saturate(.88) hue-rotate(-6deg)}
@@ -669,7 +670,7 @@ window.drumEase={v:null,step(target,dt){if(this.v===null)this.v=target;const d=t
   hd.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();setVol(vol-e.deltaY/1200);},{passive:false});})();
 ['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>initAudio(),{once:false,passive:true}));
 window.simPower=()=>power;window.simCount=()=>state.shots.length;window.simRec=()=>rec;window.simVol=()=>vol;
-document.body.classList.add('la');if(!new URLSearchParams(location.search).has('nograin'))document.body.classList.add('grain');
+document.body.classList.add('la');if(!new URLSearchParams(location.search).has('nograin'))document.body.classList.add('grain');if(new URLSearchParams(location.search).has('parktone'))document.body.classList.add('parktone');
 /* first-visit hint on the device button: shows for 3 s, then fades */
 /* device hints: shown for 3 s on entry; after 5 min without any input they come back and stay until the next input */
 (function(){const held=$('held');if(!held)return;const SPEC=[['hbtn3d','눌러서 채집',.5,0,'L'],['hdial','돌려서 음량 조절',0,.5,'T']];let caps=[],raf=0,hideT=0;

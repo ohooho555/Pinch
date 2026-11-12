@@ -145,14 +145,15 @@ const LIGHT = {
   beach:  { exp: .84,  env: .66, key: .85, kc: 0xe8edf3, rim: .28, grain: .14 },  // foggy overcast coast
   summit: { exp: 1.02, env: .95, key: 1.8, kc: 0xfff4e8, rim: .55, grain: .07 },  // high, hazy, bright
   park:   { exp: .95,  env: .80, key: 1.7, kc: 0xffd9b0, rim: .40, grain: .09 },  // warm low sun
+  park2:  { exp: .86,  env: .74, key: 1.05, kc: 0xf7eadb, rim: .32, grain: .1, sr: 10 },  // test: calmer backlit park, softer shadows
   camp:   { exp: .86,  env: .70, key: 1.0, kc: 0xf0f3dc, rim: .30, grain: .11 },  // forest shade
   _grey:  { exp: .80,  env: .62, key: .75, kc: 0xe6ecf4, rim: .25, grain: .16 },  // overcast / rain
 };
 let curScene = null;
 function applyLight(id) {
-  const L = LIGHT[id] || LIGHT._grey;
+  const L = (id === 'park' && document.body.classList.contains('parktone') ? LIGHT.park2 : LIGHT[id]) || LIGHT._grey;
   renderer.toneMappingExposure = L.exp; scene.environmentIntensity = L.env;
-  key.intensity = L.key; key.color.setHex(L.kc); rim.intensity = L.rim;
+  key.intensity = L.key; key.color.setHex(L.kc); rim.intensity = L.rim; key.shadow.radius = L.sr || 4;
   film.enabled = document.body.classList.contains('grain'); film.uniforms.intensity.value = L.grain; dirty = 3;
 }
 let lastVol = -1, lastPressed = null, placed = false;
