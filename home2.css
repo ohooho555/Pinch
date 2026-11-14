@@ -1,0 +1,74 @@
+/* ?home2 — Figma 314:6602 Home flow (341:311 / 341:437 / 354:36 / 295:4441 / 314:745 / 295:4577) */
+body.h2 .fp-status{z-index:12}
+body.h2 .fp-sheet,body.h2 .fp-fade{display:none}
+body.h2 .fp-ready{top:423px}
+body.h2 .fp-bt{color:#7781ac}
+body.h2 .fp-bt svg path{fill:#7781ac}
+body.h2.newdev .fp-dev{left:86px;top:114px;width:140px;height:266px;object-fit:contain}
+
+/* bottom sheet */
+.h2-dim{position:absolute;left:0;top:0;width:308px;height:668px;background:rgba(46,46,46,.46);opacity:0;pointer-events:none;transition:opacity .35s ease;z-index:3}
+.h2-dim.on{opacity:1;pointer-events:auto}
+.h2-sh{position:absolute;left:0;top:456px;width:308px;height:468px;z-index:4;transition:transform .42s cubic-bezier(.32,.72,0,1);touch-action:none}
+.h2-sh.drag{transition:none}
+.h2-sh.open{transform:translateY(-256px)}
+.h2-sh .bg{position:absolute;inset:0;background:#ebebf3;border-radius:22px 22px 0 0;box-shadow:inset 0 0 64px 6px #dddde4}
+.h2-sh .grab{position:absolute;left:0;top:0;width:100%;height:26px;cursor:grab}
+.h2-sh .grab::after{content:"";position:absolute;left:143px;top:9px;width:22px;height:4px;border-radius:2px;background:#b2b2b7}
+.h2-sh>*{position:absolute;margin:0}
+.h2-sh .fp-roll{left:23px;top:29px}
+.h2-sh .fp-cnt{right:24px;top:29px;letter-spacing:-.8px}
+.h2-sh .fp-bars{left:26px;top:59px;width:256px}
+.h2-sh .fp-bars i{width:7.642px}
+.h2-sh .fp-bars i.f{background:#05111f}
+.h2-sh .fp-cta{top:81px;background:#dadae4;color:#84898e;transition:background-color .3s,color .3s}
+.h2-sh .fp-cta:not(:disabled){background:#f95e63;color:#fff}
+.h2-x{opacity:0;transition:opacity .3s ease;pointer-events:none}
+.h2-sh.open .h2-x{opacity:1;pointer-events:auto}
+.h2-lb{left:23px;top:137px;font:500 11px/12px "Pretendard Variable",Pretendard,sans-serif;letter-spacing:-.44px;color:#a2a2a2}
+.h2-dt{left:23px;top:151px;font:500 11px/12px "Pretendard Variable",Pretendard,sans-serif;letter-spacing:-.33px;color:#a2a2a2}
+.h2-cap{left:0;width:100%;top:360px;text-align:center;font:500 10px/12px "Pretendard Variable",Pretendard,sans-serif;letter-spacing:-.4px;color:#a2a2a2}
+.h2-stack{left:0;top:0;width:308px;height:468px;pointer-events:none}
+.h2-stack .cd{position:absolute;width:78.542px;height:134.843px;margin:-67.42px 0 0 -39.27px;border-radius:9px;overflow:hidden;background:#d6d6de;border:.4px solid rgba(231,233,240,.3);box-sizing:border-box}
+.h2-stack .cd img,.h2-stack .cd .amb{position:absolute;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);object-fit:cover;filter:blur(5px)}
+.h2-stack .cd::after{content:"";position:absolute;inset:0;background:rgba(233,233,241,.25)}
+
+/* full-phone screens */
+.h2-scr{position:absolute;inset:0;background:#ededf2;z-index:8;opacity:0;pointer-events:none;transition:opacity .4s ease;font-family:"Pretendard Variable",Pretendard,sans-serif;color:#060606}
+.h2-scr.on{opacity:1;pointer-events:auto}
+.h2-scr>*{position:absolute;margin:0}
+
+/* onboarding 295:4577 */
+#h2Onb .t{left:0;width:100%;top:141px;text-align:center;font:400 18.033px "Helvetica Neue",Helvetica,sans-serif;color:#060606}
+#h2Onb .t i{font-style:normal;display:inline-block;width:14px;text-align:left}
+#h2Onb img{left:65px;top:187px;width:177px;height:335px;object-fit:contain}
+
+/* developing 295:4441 */
+#h2Load .r{left:0;width:100%;top:90px;text-align:center;font-size:17px;letter-spacing:-.34px}
+#h2Load .h{left:0;width:100%;top:119px;text-align:center;font-weight:500;font-size:27px;line-height:25px;letter-spacing:-1.08px;color:#000}
+#h2Load svg{left:68px;top:235px;width:171px;height:171px}
+#h2Load .p{left:0;width:100%;top:296px;height:49px;display:flex;align-items:center;justify-content:center;font-weight:500;color:#000;letter-spacing:-1.4px}
+#h2Load .p b{font-weight:500;font-size:35px}#h2Load .p small{font-size:20px;letter-spacing:-.8px}
+#h2Load .c{left:0;width:100%;top:451px;text-align:center;font-weight:500;font-size:13px;line-height:12px;letter-spacing:-.52px;color:#a2a2a2}
+
+/* record overview 314:745 */
+#h2Rec .sc{inset:0;overflow-y:auto;padding:94px 0 120px;box-sizing:border-box;scrollbar-width:none}
+#h2Rec .sc::-webkit-scrollbar{display:none}
+#h2Rec .in{margin:0 0 0 24px;font-size:11px;line-height:12px;letter-spacing:-.44px;color:#000}
+#h2Rec .in p{margin:0 0 3px}
+#h2Rec .gr{display:grid;grid-template-columns:repeat(3,96px);gap:3px;margin:16px 0 0 7px}
+#h2Rec .k{position:relative;width:96px;height:107px;border-radius:6px;overflow:hidden;border:1px solid rgba(170,170,170,.4);box-sizing:border-box;cursor:pointer;background:#c9ccd3}
+#h2Rec .k img,#h2Rec .k .amb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#h2Rec .k::before{content:"";position:absolute;left:0;right:0;bottom:0;height:79px;background:linear-gradient(to bottom,rgba(30,41,55,0) 41.436%,#1e2937);z-index:1}
+#h2Rec .k .m{position:absolute;left:5.4px;bottom:6px;z-index:2;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+#h2Rec .k .nm{font-weight:500;font-size:11px;line-height:12px;letter-spacing:-.22px;color:#fff;white-space:nowrap}
+#h2Rec .k .du{display:flex;align-items:center;justify-content:center;gap:4px;width:47.086px;box-sizing:border-box;padding:3.5px 7px;border-radius:78px;background:rgba(237,237,242,.68);font-size:9px;line-height:7px;letter-spacing:-.09px;color:#1e2937}
+#h2Rec .k .du svg{width:4.2px;height:6.6px;flex:none}
+#h2Rec .k.on{box-shadow:inset 0 0 0 2px #f95e63}
+#h2Rec .k.on .du{background:#f95e63;color:#fff}#h2Rec .k.on .du svg path{stroke:#fff}
+#h2Rec .hd{left:0;top:0;width:308px;height:82px;background:#ededf2;z-index:2}
+#h2Rec .bk{left:13px;top:48px;width:34.484px;height:34.484px;border:0;padding:0;background:none;cursor:pointer;z-index:3}
+#h2Rec .tt{left:0;width:100%;top:52px;text-align:center;font-size:20px;letter-spacing:-.8px;color:#000;z-index:3;pointer-events:none}
+#h2Rec .mr{left:265px;top:53px;width:20px;height:20px;z-index:3}
+#h2Rec .nf{left:23px;top:587px;width:262px;height:54px;border:0;border-radius:55px;background:#f95e63;color:#fff;font:500 12px "Pretendard Variable",Pretendard,sans-serif;letter-spacing:-.48px;box-shadow:0 0 9.2px rgba(0,0,0,.4);cursor:pointer;z-index:3}
+body.h2 .fp-tab{z-index:5}
