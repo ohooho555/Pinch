@@ -51,10 +51,11 @@ let recOpen=false;
 function renderRec(){const n=state.shots.length;$('h2RT').textContent=rollTxt();$('h2RN').textContent=n+'개의 순간';
   $('h2RD').textContent=n?ymd(state.shots[0].t)+' - '+ymd(state.shots[n-1].t):'';
   const seen={},im=s=>{const src=domSrc(s),k=s.sc+'/'+(src||'amb');seen[k]=seen[k]==null?0:seen[k]+1;return `<img src="${window.h2ShotImg?h2ShotImg(s.sc,src,seen[k]):''}" alt="" loading="lazy">`;};
-  $('h2Gr').innerHTML=state.shots.map((s,i)=>`<div class="k" data-i="${i}">${im(s)}<div class="m"><span class="nm">${enName(s)}</span><span class="du">${MIC}00:03</span></div></div>`).join('');
-  $('h2Gr').querySelectorAll('.k').forEach(k=>k.addEventListener('click',()=>{rec.querySelectorAll('.k.on').forEach(x=>x.classList.remove('on'));k.classList.add('on');
-    playShot(+k.dataset.i,document.createElement('i'));clearTimeout(k._t);k._t=setTimeout(()=>k.classList.remove('on'),3000);}));}
-$('h2Bk').addEventListener('click',()=>{recOpen=false;if(playing)playing();show(rec,false);renderApp();});
+  $('h2Gr').innerHTML=state.shots.map((s,i)=>`<div class="k" data-i="${i}">${im(s)}<div class="m"><span class="nm">${enName(s)}</span><span class="du">${MIC}${window.h2DurTxt?h2DurTxt('r'+state.roll+'_'+i):'00:03'}</span></div></div>`).join('');
+  $('h2Gr').querySelectorAll('.k').forEach(k=>k.addEventListener('click',()=>{const was=k.classList.contains('on');rec.querySelectorAll('.k.on').forEach(x=>x.classList.remove('on'));
+    if(was){window.h2Stop&&h2Stop();return;}const i=+k.dataset.i,s=state.shots[i];k.classList.add('on');
+    if(window.h2PlayRec)h2PlayRec({id:'r'+state.roll+'_'+i,sc:s.sc,m:s.m,v:s.v},()=>k.classList.remove('on'));else playShot(i,document.createElement('i'));}));}
+$('h2Bk').addEventListener('click',()=>{recOpen=false;window.h2Stop?h2Stop():playing&&playing();show(rec,false);renderApp();});
 $('h2New').addEventListener('click',()=>{if(playing)playing();state={roll:state.roll+1,shots:[],developed:false};save();renderCounter();recOpen=false;show(rec,false);setOpen(false);renderApp();toast('새 필름을 넣었어요 · 다시 밖으로 나가볼까요?');});
 function openRec(){recOpen=true;renderRec();rec.querySelector('.sc').scrollTop=0;show(rec,true);}
 

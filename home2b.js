@@ -42,16 +42,21 @@ const catOf=r=>r.src?(CAT[r.src]||'Personal'):'Personal';
 const imgOf=r=>{const v=(r.vi||0)%4;if(!r.src)return `photos/${r.sc}/amb_${v+1}.jpg`;return `photos/${r.sc}/${r.src}${v?'_'+(v+1):''}.jpg`;};
 window.h2ShotImg=(sc,src,v)=>src?`photos/${sc}/${src}${v%4?'_'+(v%4+1):''}.jpg`:`photos/${sc}/amb_${v%4+1}.jpg`;
 
+/* running time per record: stable pseudo-random 0:12 – 3:40 */
+const durSec=key=>{let h=2166136261;for(const c of String(key)){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return 12+((h>>>0)%209);};
+const durTxt=key=>{const d=durSec(key);return p2(Math.floor(d/60))+':'+p2(d%60);};
+window.h2DurTxt=durTxt;
 /* ---------- playback ---------- */
 let pTok=0;
 function playRec(r,onEnd){if(!initAudio()){toast('이 브라우저에서는 소리를 재생할 수 없어요');return;}
-  if(playing)playing();const tok=++pTok,S=sceneOf(r.sc),m=r.m||S.src.map(q=>q.id===r.src?1:.06);
+  if(playing)playing();const tok=++pTok,S=sceneOf(r.sc),m=r.m||S.src.map(q=>q.id===r.src?1:.06),D=durSec(r.id);
   loadSounds(r.sc).then(bufs=>{if(tok!==pTok)return;const out=ctx.createGain(),t=ctx.currentTime,list=[];
-    out.gain.setValueAtTime(0,t);out.gain.linearRampToValueAtTime(.9,t+.3);out.gain.setValueAtTime(.9,t+2.7);out.gain.linearRampToValueAtTime(0,t+3);out.connect(ctx.destination);
-    S.src.forEach((q,k)=>{if(!bufs[q.id])return;const c=chain(bufs[q.id],out,false);c.g.gain.value=gainFor(q.lv,m[k],Math.max(.4,r.v||.7));c.src.start(t,Math.random()*2);c.src.stop(t+3.1);list.push(c.src);});
-    const tm=setTimeout(()=>{if(tok===pTok){playing=null;onEnd&&onEnd();}},3000);
+    out.gain.setValueAtTime(0,t);out.gain.linearRampToValueAtTime(.9,t+.3);out.gain.setValueAtTime(.9,t+D-.6);out.gain.linearRampToValueAtTime(0,t+D);out.connect(ctx.destination);
+    S.src.forEach((q,k)=>{if(!bufs[q.id])return;const c=chain(bufs[q.id],out,false);c.g.gain.value=gainFor(q.lv,m[k],Math.max(.4,r.v||.7));c.src.start(t,Math.random()*2);c.src.stop(t+D+.1);list.push(c.src);});
+    const tm=setTimeout(()=>{if(tok===pTok){playing=null;onEnd&&onEnd();}},D*1000);
     playing=()=>{clearTimeout(tm);list.forEach(x=>{try{x.stop();}catch(e){}});playing=null;onEnd&&onEnd();};});}
 function stopAll(){pTok++;if(playing)playing();}
+window.h2PlayRec=playRec;window.h2Stop=stopAll;
 
 /* ---------- screens ---------- */
 function scr(id){const d=document.createElement('div');d.className='a-scr';d.id=id;fp.insertBefore(d,fp.querySelector('.fp-tab'));return d;}
@@ -124,9 +129,9 @@ function glassArc(){if(!window.pinchGlass)return;const a=$('aAll');if(a)pinchGla
 function openSub(s){stopAll();sub=s;renderSub();on(sSub,true);}
 function renderSub(){const L=sub.list();let h=`<button class="a-bk" id="aSB" aria-label="뒤로"></button><p class="a-tt">${sub.title}</p>`;
   if(sub.type==='day'){
-    h+=`<div class="a-ls">${L.map(r=>`<div class="a-row" data-id="${r.id}"><img class="t" src="${imgOf(r)}" alt=""><span class="n">${nameOf(r)}</span><span class="h">${ampm(r.t)}</span><span class="d"><img src="${F}mic_l.svg" alt="">00:03</span><svg class="m" viewBox="0 0 20 20" fill="none" style="transform:rotate(90deg)"><path d="M10.8331 15.1919C10.8331 14.8334 10.5425 14.5429 10.1841 14.5429C9.82571 14.5429 9.53516 14.8334 9.53516 15.1919C9.53516 15.5503 9.82571 15.8408 10.1841 15.8408C10.5425 15.8408 10.8331 15.5503 10.8331 15.1919Z" fill="#525252" stroke="#525252"/><path d="M10.8331 9.99948C10.8331 9.64107 10.5425 9.35052 10.1841 9.35052C9.82571 9.35052 9.53516 9.64107 9.53516 9.99948C9.53516 10.3579 9.82571 10.6484 10.1841 10.6484C10.5425 10.6484 10.8331 10.3579 10.8331 9.99948Z" fill="#525252" stroke="#525252"/><path d="M10.8331 4.80807C10.8331 4.44966 10.5425 4.15911 10.1841 4.15911C9.82571 4.15911 9.53516 4.44966 9.53516 4.80807C9.53516 5.16648 9.82571 5.45703 10.1841 5.45703C10.5425 5.45703 10.8331 5.16648 10.8331 4.80807Z" fill="#525252" stroke="#525252"/></svg></div>`).join('')}</div>`;
+    h+=`<div class="a-ls">${L.map(r=>`<div class="a-row" data-id="${r.id}"><img class="t" src="${imgOf(r)}" alt=""><span class="n">${nameOf(r)}</span><span class="h">${ampm(r.t)}</span><span class="d"><img src="${F}mic_l.svg" alt="">${durTxt(r.id)}</span><svg class="m" viewBox="0 0 20 20" fill="none" style="transform:rotate(90deg)"><path d="M10.8331 15.1919C10.8331 14.8334 10.5425 14.5429 10.1841 14.5429C9.82571 14.5429 9.53516 14.8334 9.53516 15.1919C9.53516 15.5503 9.82571 15.8408 10.1841 15.8408C10.5425 15.8408 10.8331 15.5503 10.8331 15.1919Z" fill="#525252" stroke="#525252"/><path d="M10.8331 9.99948C10.8331 9.64107 10.5425 9.35052 10.1841 9.35052C9.82571 9.35052 9.53516 9.64107 9.53516 9.99948C9.53516 10.3579 9.82571 10.6484 10.1841 10.6484C10.5425 10.6484 10.8331 10.3579 10.8331 9.99948Z" fill="#525252" stroke="#525252"/><path d="M10.8331 4.80807C10.8331 4.44966 10.5425 4.15911 10.1841 4.15911C9.82571 4.15911 9.53516 4.44966 9.53516 4.80807C9.53516 5.16648 9.82571 5.45703 10.1841 5.45703C10.5425 5.45703 10.8331 5.16648 10.8331 4.80807Z" fill="#525252" stroke="#525252"/></svg></div>`).join('')}</div>`;
   }else{
-    h+=`<button class="a-pl" id="aPA" aria-label="항목 추가"></button><p class="a-cnt">${L.length}개의 항목</p><div class="a-gr">${L.slice().reverse().map(r=>`<img src="${imgOf(r)}" data-id="${r.id}" alt="${nameOf(r)}" loading="lazy">`).join('')}</div>`;
+    h+=`<button class="a-pl" id="aPA" aria-label="항목 추가"><img class="ico" src="${F}play_d.svg" alt=""></button><p class="a-cnt">${L.length}개의 항목</p><div class="a-gr">${L.slice().reverse().map(r=>`<img src="${imgOf(r)}" data-id="${r.id}" alt="${nameOf(r)}" loading="lazy">`).join('')}</div>`;
   }
   sSub.innerHTML=h;$('aSB').onclick=()=>{stopAll();on(sSub,false);sub=null;renderArc();};
   const byId=id=>L.find(r=>r.id===id);
@@ -136,8 +141,8 @@ function renderSub(){const L=sub.list();let h=`<button class="a-bk" id="aSB" ari
 /* ---------- detail ---------- */
 function openDet(r){if(!r)return;stopAll();det=r;
   sDet.innerHTML=`<button class="a-bk" id="aDB" aria-label="뒤로"></button><div class="ph"><img src="${imgOf(r)}" alt=""></div><div class="tp"><i></i></div>
-  <span class="du"><img src="${F}mic_l.svg" alt="">00:03</span><button class="hr ${FAV.has(r.id)?'on':''}" id="aHr" aria-label="즐겨찾기"></button>
-  <div class="bt"><div class="r1"><span class="nm">${nameOf(r)}</span><button class="pb" id="aPB" aria-label="재생"></button></div>
+  <span class="du"><img src="${F}mic_l.svg" alt="">${durTxt(r.id)}</span><button class="hr ${FAV.has(r.id)?'on':''}" id="aHr" aria-label="즐겨찾기"></button>
+  <div class="bt"><div class="r1"><span class="nm">${nameOf(r)}</span><button class="pb" id="aPB" aria-label="재생"><img class="ico" src="${F}play_l.svg" alt=""></button></div>
   <div class="if"><p><img src="${F}clock_l.svg" alt="">${ymdS(r.t)} - ${hm(r.t)}</p><p><img src="${F}geo_l.svg" alt="">${PLACE[r.sc]||''}</p></div></div>`;
   on(sDet,true);
   $('aDB').onclick=()=>{stopAll();on(sDet,false);det=null;if(sub)renderSub();else if(tab==='map')renderMap();};
