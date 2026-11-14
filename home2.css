@@ -65,7 +65,7 @@ body.h2.newdev .fp-dev{left:86px;top:114px;width:140px;height:266px;object-fit:c
 #h2Rec .k .du{display:flex;align-items:center;justify-content:center;gap:4px;width:47.086px;box-sizing:border-box;padding:3.5px 7px;border-radius:78px;background:rgba(237,237,242,.68);font-size:9px;line-height:7px;letter-spacing:-.09px;color:#1e2937}
 #h2Rec .k .du svg{width:4.2px;height:6.6px;flex:none}
 #h2Rec .k.on{box-shadow:inset 0 0 0 2px #f95e63}
-#h2Rec .k.on .du{background:#f95e63;color:#fff}#h2Rec .k.on .du svg path{stroke:#fff}
+#h2Rec .k.on .du{background:#f95e63;color:#fff}#h2Rec .k.on .du svg path{fill:#fff}
 #h2Rec .hd{left:0;top:0;width:308px;height:82px;background:#ededf2;z-index:2}
 #h2Rec .bk{left:13px;top:48px;width:34.484px;height:34.484px;border:0;padding:0;background:none;cursor:pointer;z-index:3}
 #h2Rec .tt{left:0;width:100%;top:52px;text-align:center;font-size:20px;letter-spacing:-.8px;color:#000;z-index:3;pointer-events:none}
