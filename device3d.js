@@ -43,6 +43,9 @@ const key = new THREE.DirectionalLight(SUN ? 0xffe9cc : 0xfff3e6, SUN ? 2.0 : 1.
 key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -.09, right: .09, top: .09, bottom: -.09, near: .05, far: 1.5 });
 key.shadow.bias = -.0004; key.shadow.normalBias = .0004; key.shadow.radius = 4; key.shadow.blurSamples = 12; scene.add(key);
 const rim = new THREE.DirectionalLight(SUN ? 0xcfe0ff : 0xdfe6ff, SUN ? .5 : .35); rim.position.set(.6, .2, -.5); scene.add(rim);
+const RIMC0 = rim.color.getHex();
+// ambient bounce from the surroundings (e.g. green from trees/grass); off unless a scene sets it
+const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0); scene.add(hemi);
 renderer.toneMappingExposure = .98;
 const camera = new THREE.PerspectiveCamera(24, W / H, 0.005, 5);
 
@@ -145,7 +148,7 @@ const LIGHT = {
   beach:  { exp: .84,  env: .66, key: .85, kc: 0xe8edf3, rim: .28, grain: .14 },  // foggy overcast coast
   summit: { exp: 1.02, env: .95, key: 1.8, kc: 0xfff4e8, rim: .55, grain: .07 },  // high, hazy, bright
   park:   { exp: .95,  env: .80, key: 1.7, kc: 0xffd9b0, rim: .40, grain: .09 },  // warm low sun
-  park2:  { exp: .86,  env: .74, key: 1.05, kc: 0xf7eadb, rim: .32, grain: .1, sr: 10 },  // test: calmer backlit park, softer shadows
+  park2:  { exp: .90,  env: .70, key: 1.15, kc: 0xedf2ea, rim: .32, rc: 0xe4f0dc, grain: .1, sr: 8, hemi: .55, hs: 0xe6eee8, hg: 0x6f9258 },  // test: neutral (not warm) sun + green bounce from trees/grass
   camp:   { exp: .86,  env: .70, key: 1.0, kc: 0xf0f3dc, rim: .30, grain: .11 },  // forest shade
   _grey:  { exp: .80,  env: .62, key: .75, kc: 0xe6ecf4, rim: .25, grain: .16 },  // overcast / rain
 };
@@ -153,7 +156,8 @@ let curScene = null;
 function applyLight(id) {
   const L = (id === 'park' && document.body.classList.contains('parktone') ? LIGHT.park2 : LIGHT[id]) || LIGHT._grey;
   renderer.toneMappingExposure = L.exp; scene.environmentIntensity = L.env;
-  key.intensity = L.key; key.color.setHex(L.kc); rim.intensity = L.rim; key.shadow.radius = L.sr || 4;
+  key.intensity = L.key; key.color.setHex(L.kc); rim.intensity = L.rim; rim.color.setHex(L.rc || RIMC0); key.shadow.radius = L.sr || 4;
+  hemi.intensity = L.hemi || 0; if (L.hemi) { hemi.color.setHex(L.hs); hemi.groundColor.setHex(L.hg); }
   film.enabled = document.body.classList.contains('grain'); film.uniforms.intensity.value = L.grain; dirty = 3;
 }
 let lastVol = -1, lastPressed = null, placed = false;
