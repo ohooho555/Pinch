@@ -34,10 +34,13 @@ window.h2ArchiveAdd=function(){if(!state.developed||ARCH.some(r=>r.roll===state.
   state.shots.forEach((s,i)=>ARCH.push({id:'r'+state.roll+'_'+i,roll:state.roll,sc:s.sc,src:domSrc(s),m:s.m,v:s.v,t:s.t}));sv('pinch-arch',ARCH);};
 window.h2ArchiveAdd();
 function records(){const m=MOCK.map((a,i)=>({id:'m'+(i+1),sc:a[4],src:a[5],t:new Date(2026,a[0]-1,a[1],a[2],a[3]).getTime()}));
-  return m.concat(ARCH).filter(r=>sceneOf(r.sc)).sort((a,b)=>a.t-b.t);}
+  const L=m.concat(ARCH).filter(r=>sceneOf(r.sc)).sort((a,b)=>a.t-b.t),seen={};
+  L.forEach(r=>{const k=r.sc+'/'+(r.src||'amb');r.vi=seen[k]=(seen[k]==null?0:seen[k]+1);});return L;}
 const nameOf=r=>r.src?((EN[r.sc]||{})[r.src]||r.src):'Ambience';
 const catOf=r=>r.src?(CAT[r.src]||'Personal'):'Personal';
-const imgOf=r=>{const S=sceneOf(r.sc),q=r.src&&S.src.find(x=>x.id===r.src);return q&&q.ph&&q.ph.length?`${pd(r.sc)}/${r.sc}/${q.ph[0]}.jpg`:`${sd(r.sc)}/${r.sc}-thumb.jpg`;};
+/* 4 photos per sound (original + 3 crops of the scene around it) → least repetition */
+const imgOf=r=>{const v=(r.vi||0)%4;if(!r.src)return `photos/${r.sc}/amb_${v+1}.jpg`;return `photos/${r.sc}/${r.src}${v?'_'+(v+1):''}.jpg`;};
+window.h2ShotImg=(sc,src,v)=>src?`photos/${sc}/${src}${v%4?'_'+(v%4+1):''}.jpg`:`photos/${sc}/amb_${v%4+1}.jpg`;
 
 /* ---------- playback ---------- */
 let pTok=0;

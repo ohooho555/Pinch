@@ -1,6 +1,6 @@
 /* ?home2 — Archive (289:2621 / 289:3322 / 289:2976 / 289:3502), Detail (289:3655), Map (314:528) */
 body.h2 .fp-tab{z-index:7}
-.fp-tabs button img{width:20px;height:20px;display:block}
+.fp-tabs button img{width:20px;height:20px;display:block;object-fit:none}
 .a-scr{position:absolute;inset:0;background:#ededf2;z-index:6;display:none;font-family:"Pretendard Variable",Pretendard,sans-serif;color:#272727;overflow:hidden}
 .a-scr.on{display:block;animation:afade .28s ease}
 @keyframes afade{from{opacity:0}to{opacity:1}}
@@ -10,7 +10,7 @@ body.h2 .fp-tab{z-index:7}
 
 /* archive top controls */
 .a-tg{top:59px;width:31.922px;height:31.922px;border:0;padding:0;border-radius:50%;cursor:pointer;background:center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center}
-.a-tg img{width:12.5px;height:12.5px;object-fit:contain}
+.a-tg img{width:12.536px;height:12.536px;object-fit:none}
 .a-tg.cal{left:29px}.a-tg.grd{left:68px}
 .a-tg.on{background-image:url(ui/f/circ_on.svg)}.a-tg:not(.on){background-image:url(ui/f/circ_off.svg)}
 .a-all{left:208px;top:59px;width:76px;height:32px;box-sizing:border-box;padding:0 6px 0 13px;border:0;border-radius:25px;background:rgba(176,179,188,.15);display:flex;align-items:center;gap:1px;font:400 11px/12px "Pretendard Variable",Pretendard,sans-serif;letter-spacing:-.33px;color:#000;cursor:pointer;white-space:nowrap}
@@ -86,7 +86,7 @@ body.h2 .fp-tab{z-index:7}
 #aDet .pb.on{background-color:#f95e63}
 #aDet .if{display:flex;flex-direction:column;gap:6.955px}
 #aDet .if p{margin:0;display:flex;align-items:center;gap:3.477px;font-size:11px;letter-spacing:-.11px;color:#e7e9f0;white-space:nowrap}
-#aDet .if img{width:10.432px;height:10.432px}
+#aDet .if img{width:10.432px;height:10.432px;object-fit:none}
 
 /* map 314:528 */
 #aMap .bg{left:-145px;top:-53px;width:639.5px;height:856.6px;max-width:none}
@@ -101,5 +101,5 @@ body.h2 .fp-tab{z-index:7}
 #aMap .cd img.t{left:10.3px;top:10.3px;width:72.126px;height:77.746px;border-radius:8px;object-fit:cover;border:1px solid rgba(185,191,207,.3);box-sizing:border-box}
 #aMap .cd .n{left:94.61px;top:14.99px;font-weight:600;font-size:14px;letter-spacing:-.14px;color:#000;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
 #aMap .cd .l{left:94.61px;display:flex;align-items:center;gap:3.477px;font-size:10px;letter-spacing:-.1px;color:#5b5c60;white-space:nowrap}
-#aMap .cd .l img{width:8px;height:8px;object-fit:contain}
+#aMap .cd .l img{width:8px;height:8px;object-fit:none}
 #aMap .cd .l.a{top:57px}#aMap .cd .l.b{top:70.25px}

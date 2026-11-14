@@ -19,18 +19,21 @@ function mapURL(W,H,P,w,h,r,b,prof){const c=document.createElement('canvas');c.w
   g.putImageData(im,0,0);return c.toDataURL();}
 const PROF={circ:t=>1-Math.sqrt(Math.max(0,1-t*t)),sq:t=>t*t,cube:t=>t*t*t,lin:t=>t};
 
-function layer(el){let L=el._gl;if(!L){L=document.createElement('i');L.className='lg-l';L.setAttribute('aria-hidden','true');
-    const R=document.createElement('i');R.className='lg-r';R.setAttribute('aria-hidden','true');el.prepend(R);el.prepend(L);el._gl=L;el._gr=R;
-    const cs=getComputedStyle(el);if(cs.position==='static')el.style.position='relative';if(cs.zIndex==='auto')el.style.zIndex='0';}
-  return L;}
+function layer(el){let L=el._gl;if(!L){const Wp=document.createElement('i');Wp.className='lg-w';Wp.setAttribute('aria-hidden','true');
+    L=document.createElement('i');L.className='lg-l';Wp.appendChild(L);
+    const R=document.createElement('i');R.className='lg-r';R.setAttribute('aria-hidden','true');el.prepend(R);el.prepend(Wp);el._gl=Wp;el._gL=L;el._gr=R;
+    const cs=getComputedStyle(el);if(cs.position==='static')el.style.position='relative';if(cs.zIndex==='auto')el.style.zIndex='0';
+    if(cs.backgroundImage&&cs.backgroundImage!=='none'){R.style.backgroundImage=cs.backgroundImage;R.style.backgroundPosition=cs.backgroundPosition;R.style.backgroundSize=cs.backgroundSize;R.style.backgroundRepeat=cs.backgroundRepeat;el.style.backgroundImage='none';el._gbg=1;}}
+  return el._gL;}
 function build(el,o){const w=el.offsetWidth,h=el.offsetHeight;if(!w||!h)return;
   const key=w+'x'+h;if(el._gk===key)return;el._gk=key;
   const rad=Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius)||0,h/2,w/2);
   const fr=Math.min(o.blur,GK.cap)*GK.kb,P=Math.ceil(Math.max(12,fr*3)),W=Math.round(w+2*P),H=Math.round(h+2*P);
   const bez=Math.max(1,Math.min(o.depth*GK.kd,h/2,w/2)),S=o.refraction*o.depth*GK.ks,dsp=Math.min(.5,o.dispersion*GK.kdisp);
   const L=layer(el),Rm=el._gr;
-  L.style.cssText=`position:absolute;left:${-P}px;top:${-P}px;width:${W}px;height:${H}px;z-index:-1;pointer-events:none;clip-path:inset(${P}px round ${rad}px);`;
-  Rm.style.cssText=`position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:${rad}px;`;
+  el._gl.style.cssText=`position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;border-radius:${rad}px;`;
+  L.style.cssText=`position:absolute;left:${-P}px;top:${-P}px;width:${W}px;height:${H}px;pointer-events:none;`;
+  ['position:absolute','inset:0','z-index:-1','pointer-events:none',`border-radius:${rad}px`].forEach(d=>{const[k,v]=d.split(':');Rm.style.setProperty(k,v);});
   let f=el._gf;if(!f){f=document.createElementNS(NS,'filter');f.id='lg'+(++uid);svg.appendChild(f);el._gf=f;}
   f.setAttribute('x','0');f.setAttribute('y','0');f.setAttribute('width',W);f.setAttribute('height',H);f.setAttribute('filterUnits','userSpaceOnUse');f.setAttribute('color-interpolation-filters','sRGB');
   const url=mapURL(W,H,P,w,h,rad,bez,PROF[GK.prof]||PROF.circ);
@@ -53,7 +56,7 @@ function light(el,o){/* specular rim: light from lightAngle (Figma -45deg = top-
 const ro=new ResizeObserver(es=>es.forEach(e=>e.target._go&&build(e.target,e.target._go)));
 const mo=new MutationObserver(ms=>ms.forEach(m=>{const el=m.target;if(el._go&&el._gl&&!el.contains(el._gl)){el.prepend(el._gr);el.prepend(el._gl);}}));
 function glass(el,o){if(!el)return;el._go=o;el._gk=null;el.classList.add('lglass');build(el,o);ro.observe(el);if(!el._gmo){el._gmo=1;mo.observe(el,{childList:true});}}
-function unglass(el){if(!el)return;el._go=null;el._gk=null;if(el._gl){el._gl.remove();el._gr.remove();el._gl=el._gr=null;}}
+function unglass(el){if(!el)return;el._go=null;el._gk=null;if(el._gl){el._gl.remove();el._gr.remove();el._gl=el._gr=el._gL=null;if(el._gbg){el.style.backgroundImage='';el._gbg=0;}}}
 window.pinchUnglass=unglass;
 window.pinchGlass=glass;
 
