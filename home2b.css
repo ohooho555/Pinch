@@ -14,7 +14,7 @@ body.h2 .fp-tab{z-index:7}
 .a-tg.cal{left:29px}.a-tg.grd{left:68px}
 .a-tg.on{background:rgba(5,17,31,.85)}.a-tg:not(.on){background:rgba(5,17,31,.26)}
 .a-tg{overflow:visible}
-.a-tg.on::after{content:"";position:absolute;left:-2.6px;top:1.2px;z-index:2;width:3.677px;height:8.885px;background:#f95e63;transform:rotate(-51.006deg);transform-origin:0 0}
+.a-tg.on::after{content:"";position:absolute;left:.0195px;top:3.006px;z-index:2;width:3.677px;height:8.885px;background:#f95e63;transform:rotate(-51.006deg);transform-origin:0 0}
 .a-all{left:208px;top:59px;width:76px;height:32px;box-sizing:border-box;padding:0 6px 0 13px;border:0;border-radius:25px;background:rgba(176,179,188,.15);display:flex;align-items:center;gap:1px;font:400 11px/12px "Pretendard Variable",Pretendard,sans-serif;letter-spacing:-.33px;color:#000;cursor:pointer;white-space:nowrap}
 .a-all img{width:14px;height:14px;transform:rotate(180deg)}
 
