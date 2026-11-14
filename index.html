@@ -692,7 +692,7 @@ layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);
 </script>
 
 
-<script>if(new URLSearchParams(location.search).has('home2')){const l=document.createElement('link');l.rel='stylesheet';l.href='home2.css';document.head.appendChild(l);const l2=document.createElement('link');l2.rel='stylesheet';l2.href='home2b.css';document.head.appendChild(l2);['home2.js','home2b.js','glass.js'].forEach(f=>{const s=document.createElement('script');s.src=f;s.async=false;document.body.appendChild(s);});}</script>
+<script>if(!new URLSearchParams(location.search).has('old')){const l=document.createElement('link');l.rel='stylesheet';l.href='home2.css';document.head.appendChild(l);const l2=document.createElement('link');l2.rel='stylesheet';l2.href='home2b.css';document.head.appendChild(l2);['home2.js','home2b.js','glass.js'].forEach(f=>{const s=document.createElement('script');s.src=f;s.async=false;document.body.appendChild(s);});}</script>
 <script>if(new URLSearchParams(location.search).get('device')!=='img'){document.getElementById('held').classList.add('d3wait');setTimeout(()=>document.getElementById('held').classList.remove('d3wait'),12000);const m=document.createElement('script');m.type='module';m.src='device3d.js';document.body.appendChild(m);}</script>
 </body>
 </html>
