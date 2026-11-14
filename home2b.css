@@ -35,6 +35,7 @@ body.h2 .fp-tab{z-index:7}
 /* category view */
 .a-al{width:65.463px;height:90px;cursor:pointer;border:0;padding:0;background:none;font-family:inherit}
 .a-al>*{position:absolute}
+.a-al .alb{left:0;top:0;overflow:visible}
 .a-al .bk2{left:3.34px;top:8.34px;width:58.374px;height:46.699px;border-radius:6.671px;background:#c6c6c8}
 .a-al .p{width:27.519px;height:38.36px;border-radius:4.17px;overflow:hidden;border:.078px solid #fff;background:#b9bcc4}
 .a-al .p img{width:100%;height:100%;object-fit:cover;display:block}
@@ -103,3 +104,4 @@ body.h2 .fp-tab{z-index:7}
 #aMap .cd .l{left:94.61px;display:flex;align-items:center;gap:3.477px;font-size:10px;letter-spacing:-.1px;color:#5b5c60;white-space:nowrap}
 #aMap .cd .l img{width:8px;height:8px;object-fit:none}
 #aMap .cd .l.a{top:57px}#aMap .cd .l.b{top:70.25px}
+.a-scr::after{content:"";position:absolute;left:50%;bottom:6.2px;width:105px;height:3.92px;margin-left:-52.5px;border-radius:78px;background:#fff;z-index:9;pointer-events:none}

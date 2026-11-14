@@ -72,6 +72,20 @@ function goTab(k){if(k==='my'){toast('마이 화면은 아직 준비 중이에�
 window.h2GoTab=goTab;
 paintTabs();
 
+/* album = back card + 2 tilted photos + frosted glass folder (Figma GLASS r12.5, white 15%) — drawn in SVG so the blur is exact */
+const FOLDER="M2.49724 32.7919L0.0316327 7.31395C-0.347732 3.39386 2.73354 0 6.67195 0H29.1952C31.1427 0 32.993 0.851017 34.2605 2.32969L37.772 6.42645C39.0394 7.90512 40.8897 8.75614 42.8372 8.75614H57.242C61.2503 8.75614 64.3537 12.2656 63.8633 16.2438L61.7609 33.2965C61.3464 36.6582 58.4787 39.1758 55.0916 39.1514L9.08957 38.8204C5.67245 38.7959 2.8264 36.1932 2.49724 32.7919Z";
+function albumSVG(k,L){const id='al'+k,ph=(r,cx,cy,rot,n)=>{const w=27.519,h=38.36,x=cx-w/2,y=cy-h/2;
+    return `<g transform="rotate(${rot} ${cx} ${cy})"><clipPath id="${id}c${n}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4.17"/></clipPath>`+
+      (r?`<image href="${imgOf(r)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id}c${n})"/>`:`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4.17" fill="#b9bcc4"/>`)+
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4.17" fill="none" stroke="#fff" stroke-width=".3"/></g>`;};
+  return `<svg class="alb" viewBox="0 0 65.463 58" width="65.463" height="58" aria-hidden="true"><defs>
+    <clipPath id="${id}f"><path transform="translate(.674 17.93)" d="${FOLDER}"/></clipPath>
+    <filter id="${id}b" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5.2"/></filter>
+    <linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".45" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".45"/></linearGradient></defs>
+    <g id="${id}s"><rect x="3.336" y="8.34" width="58.374" height="46.699" rx="6.671" fill="#c6c6c8"/>${ph(L[0],23.95,21.52,-11.41,1)}${ph(L[1],42.04,27.7,13.51,2)}</g>
+    <g clip-path="url(#${id}f)"><rect x="-5" y="10" width="76" height="52" fill="#ededf2"/><use href="#${id}s" filter="url(#${id}b)"/><path transform="translate(.674 17.93)" d="${FOLDER}" fill="#fff" fill-opacity=".15"/></g>
+    <path transform="translate(.674 17.93)" d="${FOLDER}" fill="none" stroke="url(#${id}g)" stroke-width=".8"/></svg>`;}
+
 /* ---------- archive root ---------- */
 function monthRecs(y,m){return records().filter(r=>{const d=new Date(r.t);return d.getFullYear()===y&&d.getMonth()===m;});}
 function renderArc(){const y=month.getFullYear(),mo=month.getMonth(),recs=monthRecs(y,mo);
@@ -93,7 +107,7 @@ function renderArc(){const y=month.getFullYear(),mo=month.getMonth(),recs=monthR
     const all=records(),grp={};CATS.forEach(c=>grp[c]=[]);all.forEach(r=>{grp[catOf(r)].push(r);if(FAV.has(r.id))grp.Favorites.push(r);});
     const POS=[[30,158],[120.88,158],[211.75,158],[31,274],[121.46,275],[212.34,275],[30,390]];
     CATS.forEach((c,i)=>{const L=grp[c].slice(-2).reverse(),[x,yy]=POS[i];
-      h+=`<button class="a-al" data-c="${c}" style="left:${x}px;top:${yy}px"><i class="bk2"></i><i class="p p1">${L[0]?`<img src="${imgOf(L[0])}" alt="">`:''}</i><i class="p p2">${L[1]?`<img src="${imgOf(L[1])}" alt="">`:''}</i><img class="fd" src="${F}folder.svg" alt=""><span class="nm">${c}</span><span class="ct"><img src="${F}album.svg" alt="">${grp[c].length}</span></button>`;});
+      h+=`<button class="a-al" data-c="${c}" style="left:${x}px;top:${yy}px">${albumSVG(i,L)}<span class="nm">${c}</span><span class="ct"><img src="${F}album.svg" alt="">${grp[c].length}</span></button>`;});
     h+=`<button class="a-add" id="aAdd" style="left:121px;top:398.34px"><img src="${F}addalb.svg" alt=""><b>+</b><span>앨범 추가</span></button>`;
   }
   sArc.innerHTML=h;
