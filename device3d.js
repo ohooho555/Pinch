@@ -147,7 +147,7 @@ let blink = 0;
 const LIGHT = {
   beach:  { exp: .84,  env: .66, key: .85, kc: 0xe8edf3, rim: .28, grain: .14 },  // foggy overcast coast
   summit: { exp: 1.02, env: .95, key: 1.8, kc: 0xfff4e8, rim: .55, grain: .07 },  // high, hazy, bright
-  park:   { exp: .95,  env: .80, key: 1.7, kc: 0xffd9b0, rim: .40, grain: .09 },  // warm low sun
+  park:   { exp: .90,  env: .70, key: 1.15, kc: 0xedf2ea, rim: .32, rc: 0xe4f0dc, grain: .1, sr: 8, hemi: .55, hs: 0xe6eee8, hg: 0x6f9258 },  // neutral sun + green bounce from trees/grass
   park2:  { exp: .90,  env: .70, key: 1.15, kc: 0xedf2ea, rim: .32, rc: 0xe4f0dc, grain: .1, sr: 8, hemi: .55, hs: 0xe6eee8, hg: 0x6f9258 },  // test: neutral (not warm) sun + green bounce from trees/grass
   camp:   { exp: .86,  env: .70, key: 1.0, kc: 0xf0f3dc, rim: .30, grain: .11 },  // forest shade
   _grey:  { exp: .80,  env: .62, key: .75, kc: 0xe6ecf4, rim: .25, grain: .16 },  // overcast / rain

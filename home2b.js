@@ -30,8 +30,11 @@ const ld=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?
 const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
 let ARCH=ld('pinch-arch',[]),FAV=new Set(ld('pinch-fav',FAV0));
 const domSrc=s=>{const S=sceneOf(s.sc);if(!S)return null;let bi=0;s.m.forEach((v,i)=>{if(v>s.m[bi])bi=i;});return s.m[bi]>.4?S.src[bi].id:null;};
-window.h2ArchiveAdd=function(){if(!state.developed||ARCH.some(r=>r.roll===state.roll))return;
-  state.shots.forEach((s,i)=>ARCH.push({id:'r'+state.roll+'_'+i,roll:state.roll,sc:s.sc,src:domSrc(s),m:s.m,v:s.v,t:s.t}));sv('pinch-arch',ARCH);};
+/* archive keeps sample data + only the most recently developed roll, so counts never pile up across test runs */
+ARCH=(()=>{const last=ARCH.reduce((m,r)=>Math.max(m,r.roll||0),0),seen=new Set();return ARCH.filter(r=>r.roll===last&&!seen.has(r.id)&&seen.add(r.id));})();sv('pinch-arch',ARCH);
+window.h2ArchiveAdd=function(){if(!state.developed)return;const ids=state.shots.map((s,i)=>'r'+state.roll+'_'+i);
+  if(ARCH.length===ids.length&&ARCH.every((r,i)=>r.id===ids[i]))return;
+  ARCH=state.shots.map((s,i)=>({id:ids[i],roll:state.roll,sc:s.sc,src:domSrc(s),m:s.m,v:s.v,t:s.t}));sv('pinch-arch',ARCH);};
 window.h2ArchiveAdd();
 function records(){const m=MOCK.map((a,i)=>({id:'m'+(i+1),sc:a[4],src:a[5],t:new Date(2026,a[0]-1,a[1],a[2],a[3]).getTime()}));
   const L=m.concat(ARCH).filter(r=>sceneOf(r.sc)).sort((a,b)=>a.t-b.t),seen={};
