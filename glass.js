@@ -47,8 +47,8 @@ const TAB={blur:55,refraction:1,depth:1,angle:-45,intensity:.25,dispersion:1,spl
 glass(document.querySelector('.modes.gp'),PILL);
 glass(document.getElementById('pmenu'),BAR);
 glass(document.querySelector('.fp-tab'),BAR);
-function tabs(){document.querySelectorAll('.fp-tabs button').forEach(b=>{if(b.classList.contains('on'))glass(b,TAB);else{b.style.backdropFilter='';b.style.boxShadow='';}});}
-tabs();
+function tabs(){document.querySelectorAll('.fp-tabs button').forEach(b=>{if(b.classList.contains('on')){b._gk=null;glass(b,TAB);}else{b._go=null;b._gk=null;b.style.backdropFilter='';b.style.webkitBackdropFilter='';b.style.boxShadow='';}});}
+window.pinchTabsGlass=tabs;tabs();
 /* menu opens with display:none → size known only when shown */
 new MutationObserver(()=>{const m=document.getElementById('pmenu');if(m.classList.contains('on')){m._gk=null;build(m,BAR);}}).observe(document.getElementById('pmenu'),{attributes:true,attributeFilter:['class']});
 })();
