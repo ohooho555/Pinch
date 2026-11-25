@@ -93,7 +93,7 @@ loader.load('pinch.glb', g => {
     axis() { const v = new THREE.Vector3(0,0,1).applyQuaternion(model.getWorldQuaternion(new THREE.Quaternion())); return [v.x, v.y, v.z]; },
     dishFront() { const m = new THREE.Box3().setFromObject(parts.mic), d = new THREE.Box3().setFromObject(parts.mat_dish); model.updateMatrixWorld(true);
       const a = m.getCenter(new THREE.Vector3()), b = d.getCenter(new THREE.Vector3()); model.worldToLocal(a); model.worldToLocal(b); return [a.z, b.z]; } };
-}, undefined, e => { console.error('3D load fail', e); held.classList.remove('d3wait'); });
+}, undefined, e => { console.error('3D load fail', e); dbg('glb load fail ' + (e && e.message)); held.classList.remove('d3wait'); });
 
 let dirty = 3;  // render only when something changes
 let ctrMesh = null;
@@ -180,5 +180,33 @@ renderer.setAnimationLoop(t => {
   hb.style.left = (bx - hb.offsetWidth / 2) + 'px'; hb.style.top = (by - hb.offsetHeight / 2) + 'px';
   hd.style.left = (dx - hd.offsetWidth / 2) + 'px'; hd.style.top = (dy - hd.offsetHeight / 2) + 'px';
   if (film.enabled) { updateCounterMask(); film.uniforms.time.value = (t % 10000) / 1000; }
-  composer.render();
+  if (rmode === 0) { try { composer.render(); } catch (e) { dbg('composer error ' + e); rmode = 1; dirty = 3; } }
+  else renderer.render(scene, camera);
+  healthCheck();
 });
+/* Safari safety net: some Safari/WebGL setups render the post-processing chain (MSAA half-float target, AO)
+   as a blank canvas. Probe the real pixels after the first frames; if nothing shows, drop to plain rendering,
+   and if that is blank too, show the image device instead of an empty hand. */
+let rmode = new URLSearchParams(location.search).has('nopost') ? 1 : 0, probes = 0;
+function probe() {
+  const gl = renderer.getContext(), w = gl.drawingBufferWidth, h = gl.drawingBufferHeight, n = 48, px = new Uint8Array(n * n * 4);
+  let lit = 0, black = 0;
+  for (const [fx, fy] of [[.5, .5], [.42, .62], [.58, .35]]) {
+    gl.readPixels(Math.max(0, Math.floor(w * fx - n / 2)), Math.max(0, Math.floor(h * fy - n / 2)), n, n, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    for (let i = 0; i < px.length; i += 4) { if (px[i + 3] > 8) { lit++; if (px[i] + px[i + 1] + px[i + 2] < 6) black++; } } }
+  return { lit, black };
+}
+function healthCheck() {
+  if (!model || probes > 2) return;
+  if (++probes < 3) { dirty = Math.max(dirty, 1); return; }
+  const r = probe(), ok = r.lit > 200 && r.black < r.lit * .9;
+  dbg(`mode ${rmode} lit ${r.lit} black ${r.black} -> ${ok ? 'ok' : 'blank'}`);
+  if (ok) return;
+  if (rmode === 0) { rmode = 1; probes = 0; dirty = 3; return; }
+  held.classList.remove('d3'); renderer.domElement.style.display = 'none'; renderer.setAnimationLoop(null); dbg('fallback: image device');
+}
+function dbg(m) { console.log('[pinch3d] ' + m); if (!new URLSearchParams(location.search).has('debug')) return;
+  let d = document.getElementById('d3dbg'); if (!d) { d = document.createElement('pre'); d.id = 'd3dbg'; d.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:9999;max-width:60vw;max-height:40vh;overflow:auto;margin:0;padding:8px 10px;background:rgba(0,0,0,.75);color:#9f9;font:11px/1.4 monospace;border-radius:6px;white-space:pre-wrap'; document.body.appendChild(d); }
+  d.textContent += m + '\n'; }
+{ const gl = renderer.getContext(); dbg(`ua ${navigator.userAgent.replace(/.*\) /,'')}\nwebgl2 ${renderer.capabilities.isWebGL2} maxSamples ${gl.getParameter(gl.MAX_SAMPLES)} floatRT ${!!gl.getExtension('EXT_color_buffer_float')} halfRT ${!!gl.getExtension('EXT_color_buffer_half_float')}`);
+  window.addEventListener('error', e => dbg('error ' + e.message)); renderer.domElement.addEventListener('webglcontextlost', () => dbg('context lost')); }
