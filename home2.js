@@ -74,6 +74,6 @@ window.develop=develop=function(){setOpen(false);$('h2LR').textContent=rollTxt()
   const t0=performance.now(),D=3200;(function f(t){const p=Math.min(1,(t-t0)/D),e=1-Math.pow(1-p,2);
     $('h2Arc').setAttribute('stroke-dasharray',`${e*CIRC} ${CIRC}`);$('h2P').textContent=Math.round(e*100);
     if(p<1)requestAnimationFrame(f);else{state.developed=true;save();renderApp();openRec();setTimeout(()=>show(load,false),60);}})(t0);};
-ni.src='app_device2.webp';
+ni.onerror=()=>{if(!/png$/.test(ni.src))ni.src='app_device2.png';};ni.src='app_device2.webp';
 if(mode==='home')renderApp();
 })();

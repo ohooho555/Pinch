@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script>/* old Safari (macOS 10.15) can't decode WebP: swap any failed .webp image to its .png twin */
+document.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='IMG'&&/\.webp($|\?)/.test(t.src)){document.documentElement.classList.add('nowebp');t.src=t.src.replace(/\.webp/,'.png');}},true);</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pinch — 사용 시뮬레이션</title>
@@ -298,6 +300,7 @@ body.home #vHome{background:#fafafa}
 .held .grain{position:absolute;z-index:1;inset:0;pointer-events:none;display:none;mix-blend-mode:overlay;opacity:.08;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   -webkit-mask:url(device_back.webp) center/100% 100% no-repeat;mask:url(device_back.webp) center/100% 100% no-repeat}
+.nowebp .grain{-webkit-mask-image:url(device_back.png);mask-image:url(device_back.png)}
 body.grain .held.d3 .grain{display:none}
 body.grain .held .grain{display:block}
 body.grain .held .dev3d,body.grain .held .devimg{transition:filter .6s}
