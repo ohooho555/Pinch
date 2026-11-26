@@ -693,6 +693,27 @@ layout();setVol(.7);renderCounter();renderApp();requestAnimationFrame(frame);
 
 
 <script>if(!new URLSearchParams(location.search).has('old')){const l=document.createElement('link');l.rel='stylesheet';l.href='home2.css';document.head.appendChild(l);const l2=document.createElement('link');l2.rel='stylesheet';l2.href='home2b.css';document.head.appendChild(l2);['home2.js','home2b.js','glass.js'].forEach(f=>{const s=document.createElement('script');s.src=f;s.async=false;document.body.appendChild(s);});}</script>
-<script>if(new URLSearchParams(location.search).get('device')!=='img'){document.getElementById('held').classList.add('d3wait');setTimeout(()=>document.getElementById('held').classList.remove('d3wait'),12000);const m=document.createElement('script');m.type='module';m.src='device3d.js';m.onerror=()=>document.getElementById('held').classList.remove('d3wait');document.body.appendChild(m);}</script>
+<script>
+/* ?debug: on-screen log that works even if the 3D module never starts (classic script, no imports) */
+window.pinchLog=function(m){try{console.log('[pinch] '+m);}catch(e){}if(!/[?&]debug/.test(location.search))return;
+  var d=document.getElementById('d3dbg');if(!d){d=document.createElement('pre');d.id='d3dbg';d.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99999;max-width:70vw;max-height:45vh;overflow:auto;margin:0;padding:8px 10px;background:rgba(0,0,0,.8);color:#9f9;font:11px/1.4 monospace;border-radius:6px;white-space:pre-wrap';document.body.appendChild(d);}
+  d.textContent+=m+'\n';};
+window.addEventListener('error',function(e){pinchLog('error: '+(e.message||'')+(e.filename?' @'+e.filename.split('/').pop()+':'+e.lineno:'')+(e.target&&e.target.src?' load fail '+e.target.src:''));},true);
+window.addEventListener('unhandledrejection',function(e){pinchLog('promise: '+(e.reason&&(e.reason.message||e.reason)));});
+(function(){var im=!!(HTMLScriptElement.supports&&HTMLScriptElement.supports('importmap'));
+  var c=document.createElement('canvas'),gl2=!!c.getContext('webgl2');
+  pinchLog('ua: '+navigator.userAgent);pinchLog('importmap '+im+' | webgl2 '+gl2);
+  if(new URLSearchParams(location.search).get('device')==='img')return;
+  var held=document.getElementById('held');held.classList.add('d3wait');
+  var giveUp=function(why){pinchLog('3D off: '+why);held.classList.remove('d3wait');};
+  setTimeout(function(){if(!window.__d3)giveUp('timeout 12s');},12000);
+  if(!gl2){giveUp('no webgl2');return;}
+  if(im){var m=document.createElement('script');m.type='module';m.src='device3d.js';m.onerror=function(){giveUp('module load error');};document.body.appendChild(m);}
+  else{/* older Safari: no import maps -> polyfill, then load the module through it */
+    pinchLog('loading es-module-shims');var p=document.createElement('script');p.async=true;p.src='https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js';
+    p.onload=function(){window.importShim('./device3d.js').then(function(){pinchLog('module ok (shim)');},function(e){giveUp('shim import '+(e&&e.message));});};
+    p.onerror=function(){giveUp('shim load error');};document.head.appendChild(p);}
+})();
+</script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 // 테스트용: ?device=3d 일 때 손에 든 기기를 three.js 실시간 3D 모델로 교체 (예전 3D 뷰어의 래스터 버전)
 import * as THREE from 'three';
+window.pinchLog && window.pinchLog('3d: module started');
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -205,8 +206,6 @@ function healthCheck() {
   if (rmode === 0) { rmode = 1; probes = 0; dirty = 3; return; }
   held.classList.remove('d3'); renderer.domElement.style.display = 'none'; renderer.setAnimationLoop(null); dbg('fallback: image device');
 }
-function dbg(m) { console.log('[pinch3d] ' + m); if (!new URLSearchParams(location.search).has('debug')) return;
-  let d = document.getElementById('d3dbg'); if (!d) { d = document.createElement('pre'); d.id = 'd3dbg'; d.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:9999;max-width:60vw;max-height:40vh;overflow:auto;margin:0;padding:8px 10px;background:rgba(0,0,0,.75);color:#9f9;font:11px/1.4 monospace;border-radius:6px;white-space:pre-wrap'; document.body.appendChild(d); }
-  d.textContent += m + '\n'; }
+function dbg(m) { window.pinchLog ? window.pinchLog('3d: ' + m) : console.log(m); }
 { const gl = renderer.getContext(); dbg(`ua ${navigator.userAgent.replace(/.*\) /,'')}\nwebgl2 ${renderer.capabilities.isWebGL2} maxSamples ${gl.getParameter(gl.MAX_SAMPLES)} floatRT ${!!gl.getExtension('EXT_color_buffer_float')} halfRT ${!!gl.getExtension('EXT_color_buffer_half_float')}`);
   window.addEventListener('error', e => dbg('error ' + e.message)); renderer.domElement.addEventListener('webglcontextlost', () => dbg('context lost')); }
